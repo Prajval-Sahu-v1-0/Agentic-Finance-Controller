@@ -1,0 +1,179 @@
+{
+  "generated_at": "2026-08-30T19:11:11.709152+00:00",
+  "engine_config": {
+    "exact_timestamp_tolerance_hours": 1.0,
+    "amount_tolerance_pct": "2.0",
+    "timestamp_tolerance_hours": 72.0,
+    "group_tolerance_pct": "0.5",
+    "group_max_timestamp_spread_hours": 24.0,
+    "confidence_weight_amount": 0.5,
+    "confidence_weight_timestamp": 0.5,
+    "min_fuzzy_confidence": 0.0,
+    "max_group_size": 4,
+    "enable_content_fallback": true,
+    "content_amount_tolerance_pct": "0.1",
+    "content_timestamp_tolerance_hours": 48.0,
+    "enable_text_fallback": true,
+    "text_similarity_min_score": 0.1,
+    "text_similarity_min_margin": 0.03
+  },
+  "match_summary": {
+    "total_gateway_records": 104,
+    "total_ledger_records": 102,
+    "matched_exact": {
+      "count": 70,
+      "rate_pct": 67.31
+    },
+    "matched_fuzzy": {
+      "count": 0,
+      "rate_pct": 0.0
+    },
+    "matched_content": {
+      "count": 0,
+      "rate_pct": 0.0
+    },
+    "matched_text": {
+      "count": 0,
+      "rate_pct": 0.0
+    },
+    "matched_grouped": {
+      "groups": 5,
+      "gateway_records": 7,
+      "ledger_records": 9,
+      "rate_pct": 6.73
+    },
+    "total_matched": {
+      "count": 77,
+      "rate_pct": 74.04
+    },
+    "unresolved": {
+      "count": 50,
+      "rate_pct": 48.08
+    },
+    "elapsed_ms": 4.41
+  },
+  "monetary_summary": {
+    "currency": "INR",
+    "matched_gateway_value": "1951925.11",
+    "matched_ledger_value": "1951925.11",
+    "matched_amount_delta_total": "0.00",
+    "unresolved_gateway_value": "651867.58",
+    "unresolved_ledger_value": "502878.67"
+  },
+  "exception_breakdown": [
+    {
+      "category": "amount_mismatch",
+      "count": 20,
+      "share_pct": 40.0
+    },
+    {
+      "category": "stale_timing",
+      "count": 20,
+      "share_pct": 40.0
+    },
+    {
+      "category": "duplicate",
+      "count": 5,
+      "share_pct": 10.0
+    },
+    {
+      "category": "missing_in_gateway",
+      "count": 3,
+      "share_pct": 6.0
+    },
+    {
+      "category": "missing_in_ledger",
+      "count": 2,
+      "share_pct": 4.0
+    }
+  ],
+  "llm_review": {
+    "total_exceptions": 50,
+    "consulted": 3,
+    "fallback_count": 47,
+    "agreement_rate_pct": 0.0,
+    "override_count": 3,
+    "overrides": [
+      {
+        "exception_id": "EX-AMT-000015",
+        "rule_category": "amount_mismatch",
+        "llm_category": "amount_mismatch",
+        "confidence": "high",
+        "explanation": "The gateway transaction rzp_live_EUVB5INM1MjeBs (INR 46,142.40) shows a 3% discrepancy from the ledger record (INR 47,200.00), which is beyond the auto-match tolerance. The timestamp difference of 0.08h is within the acceptable range. This suggests a genuine mismatch in the amounts, likely due to a processing fee or a similar charge not accounted for in the gateway record. Action: Investigate the transaction for any additional fees or charges not reflected in the gateway record. If a fee is confirmed, create an 'additional charge' expense for the difference (INR 1,057.60) and raise a dispute with the gateway for the mismatched amount."
+      },
+      {
+        "exception_id": "EX-AMT-000016",
+        "rule_category": "amount_mismatch",
+        "llm_category": "amount_mismatch",
+        "confidence": "high",
+        "explanation": "The ledger transaction LED-2024-000073 (INR 47,569.48) shows a 3% discrepancy in amount compared to the closest candidate, which is outside the auto-match tolerance. The timestamp difference of 0.08 hours (5 minutes) is within the acceptable range. The rule explanation suggests a gateway processing fee deduction, but the amount difference is too large to be solely attributed to a standard fee. Action: Investigate the ledger and gateway records for any manual adjustments or errors that could explain the discrepancy. If no such adjustments are found, raise a dispute with the gateway for the mismatched amount."
+      },
+      {
+        "exception_id": "EX-AMT-000011",
+        "rule_category": "amount_mismatch",
+        "llm_category": "amount_mismatch",
+        "confidence": "high",
+        "explanation": "The gateway settled INR 25773.96, but the ledger shows a different amount for the same reference ID PAY20240305000068. The amount difference is 3.0000%, which exceeds the auto-match tolerance. The timestamp difference of 0.38 hours is within the tolerance range. This discrepancy is likely due to a gateway processing fee or a manual adjustment not reflected in the ledger. Action: Investigate the fee structure with the gateway and reconcile the difference if a fee was applied. If no fee should apply, raise a dispute with the gateway using reference PAY20240305000068."
+      }
+    ],
+    "samples": [
+      {
+        "exception_id": "EX-AMT-000015",
+        "category": "amount_mismatch",
+        "confidence": "high",
+        "explanation": "The gateway transaction rzp_live_EUVB5INM1MjeBs (INR 46,142.40) shows a 3% discrepancy from the ledger record (INR 47,200.00), which is beyond the auto-match tolerance. The timestamp difference of 0.08h is within the acceptable range. This suggests a genuine mismatch in the amounts, likely due to a processing fee or a similar charge not accounted for in the gateway record. Action: Investigate the transaction for any additional fees or charges not reflected in the gateway record. If a fee is confirmed, create an 'additional charge' expense for the difference (INR 1,057.60) and raise a dispute with the gateway for the mismatched amount."
+      },
+      {
+        "exception_id": "EX-AMT-000016",
+        "category": "amount_mismatch",
+        "confidence": "high",
+        "explanation": "The ledger transaction LED-2024-000073 (INR 47,569.48) shows a 3% discrepancy in amount compared to the closest candidate, which is outside the auto-match tolerance. The timestamp difference of 0.08 hours (5 minutes) is within the acceptable range. The rule explanation suggests a gateway processing fee deduction, but the amount difference is too large to be solely attributed to a standard fee. Action: Investigate the ledger and gateway records for any manual adjustments or errors that could explain the discrepancy. If no such adjustments are found, raise a dispute with the gateway for the mismatched amount."
+      },
+      {
+        "exception_id": "EX-AMT-000011",
+        "category": "amount_mismatch",
+        "confidence": "high",
+        "explanation": "The gateway settled INR 25773.96, but the ledger shows a different amount for the same reference ID PAY20240305000068. The amount difference is 3.0000%, which exceeds the auto-match tolerance. The timestamp difference of 0.38 hours is within the tolerance range. This discrepancy is likely due to a gateway processing fee or a manual adjustment not reflected in the ledger. Action: Investigate the fee structure with the gateway and reconcile the difference if a fee was applied. If no fee should apply, raise a dispute with the gateway using reference PAY20240305000068."
+      }
+    ]
+  },
+  "ground_truth_accuracy": {
+    "oracle_pairs_evaluated": 100,
+    "match_metrics": {
+      "true_positives": 75,
+      "false_positives": 0,
+      "false_negatives": 20,
+      "precision_pct": 100.0,
+      "recall_pct": 78.95,
+      "f1_pct": 88.24,
+      "grouped_tp": 5,
+      "grouped_fp": 0
+    },
+    "exception_metrics": {
+      "true_positives": 10,
+      "false_positives": 40,
+      "false_negatives": 0,
+      "precision_pct": 20.0,
+      "recall_pct": 100.0,
+      "f1_pct": 33.33,
+      "category_accuracy_pct": 100.0
+    },
+    "per_category_recall": {
+      "missing_in_ledger": {
+        "should_flag": 2,
+        "correctly_flagged": 2,
+        "recall_pct": 100.0
+      },
+      "duplicate": {
+        "should_flag": 5,
+        "correctly_flagged": 5,
+        "recall_pct": 100.0
+      },
+      "missing_in_gateway": {
+        "should_flag": 3,
+        "correctly_flagged": 3,
+        "recall_pct": 100.0
+      }
+    }
+  }
+}

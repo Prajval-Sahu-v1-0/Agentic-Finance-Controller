@@ -1,0 +1,19 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Downloaded / derived external datasets (large, reproducible via
+# src/inspect_benchrec.py + src/benchrec_map.py — not committed)
+data/external/raw/
+data/external/processed/
+
+# OS
+.DS_Store
+Thumbs.db

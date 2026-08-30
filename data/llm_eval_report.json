@@ -1,0 +1,584 @@
+{
+  "sample_size": 10,
+  "model_results": [
+    {
+      "model": "qwen2.5:7b-instruct-q4_K_M",
+      "total_calls": 10,
+      "fallback_count": 0,
+      "parse_reliability_pct": 100.0,
+      "category_agreement_pct": 100.0,
+      "avg_latency_seconds": 13.2,
+      "calls": [
+        {
+          "exception_id": "EX-MIL-000001",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 23.0
+        },
+        {
+          "exception_id": "EX-MIL-000002",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 11.84
+        },
+        {
+          "exception_id": "EX-MIG-000001",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 11.42
+        },
+        {
+          "exception_id": "EX-MIG-000003",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 12.02
+        },
+        {
+          "exception_id": "EX-AMT-000011",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 14.0
+        },
+        {
+          "exception_id": "EX-AMT-000012",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 14.82
+        },
+        {
+          "exception_id": "EX-STL-000015",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 10.87
+        },
+        {
+          "exception_id": "EX-STL-000016",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 12.57
+        },
+        {
+          "exception_id": "EX-DUP-000002",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 10.28
+        },
+        {
+          "exception_id": "EX-DUP-000003",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 11.16
+        }
+      ]
+    },
+    {
+      "model": "qwen2.5:14b",
+      "total_calls": 10,
+      "fallback_count": 1,
+      "parse_reliability_pct": 90.0,
+      "category_agreement_pct": 100.0,
+      "avg_latency_seconds": 86.7,
+      "calls": [
+        {
+          "exception_id": "EX-MIL-000001",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 110.57
+        },
+        {
+          "exception_id": "EX-MIL-000002",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 73.87
+        },
+        {
+          "exception_id": "EX-MIG-000001",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 73.56
+        },
+        {
+          "exception_id": "EX-MIG-000003",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 68.12
+        },
+        {
+          "exception_id": "EX-AMT-000011",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 102.81
+        },
+        {
+          "exception_id": "EX-AMT-000012",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 114.14
+        },
+        {
+          "exception_id": "EX-STL-000015",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": true,
+          "fallback_reason": "Request timed out after 120.0s",
+          "elapsed_seconds": 122.08
+        },
+        {
+          "exception_id": "EX-STL-000016",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 77.54
+        },
+        {
+          "exception_id": "EX-DUP-000002",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 56.5
+        },
+        {
+          "exception_id": "EX-DUP-000003",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 67.82
+        }
+      ]
+    },
+    {
+      "model": "llama3:latest",
+      "total_calls": 10,
+      "fallback_count": 0,
+      "parse_reliability_pct": 100.0,
+      "category_agreement_pct": 100.0,
+      "avg_latency_seconds": 20.44,
+      "calls": [
+        {
+          "exception_id": "EX-MIL-000001",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 77.91
+        },
+        {
+          "exception_id": "EX-MIL-000002",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 13.18
+        },
+        {
+          "exception_id": "EX-MIG-000001",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 15.72
+        },
+        {
+          "exception_id": "EX-MIG-000003",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 12.44
+        },
+        {
+          "exception_id": "EX-AMT-000011",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 15.0
+        },
+        {
+          "exception_id": "EX-AMT-000012",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "medium",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 15.34
+        },
+        {
+          "exception_id": "EX-STL-000015",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 16.28
+        },
+        {
+          "exception_id": "EX-STL-000016",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 16.29
+        },
+        {
+          "exception_id": "EX-DUP-000002",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 10.04
+        },
+        {
+          "exception_id": "EX-DUP-000003",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": true,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 12.23
+        }
+      ]
+    },
+    {
+      "model": "phi3:latest",
+      "total_calls": 10,
+      "fallback_count": 0,
+      "parse_reliability_pct": 100.0,
+      "category_agreement_pct": 100.0,
+      "avg_latency_seconds": 7.27,
+      "calls": [
+        {
+          "exception_id": "EX-MIL-000001",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 15.64
+        },
+        {
+          "exception_id": "EX-MIL-000002",
+          "rule_category": "missing_in_ledger",
+          "llm_category": "missing_in_ledger",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 5.78
+        },
+        {
+          "exception_id": "EX-MIG-000001",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 6.0
+        },
+        {
+          "exception_id": "EX-MIG-000003",
+          "rule_category": "missing_in_gateway",
+          "llm_category": "missing_in_gateway",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 5.59
+        },
+        {
+          "exception_id": "EX-AMT-000011",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 6.95
+        },
+        {
+          "exception_id": "EX-AMT-000012",
+          "rule_category": "amount_mismatch",
+          "llm_category": "amount_mismatch",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 6.55
+        },
+        {
+          "exception_id": "EX-STL-000015",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 6.43
+        },
+        {
+          "exception_id": "EX-STL-000016",
+          "rule_category": "stale_timing",
+          "llm_category": "stale_timing",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 6.74
+        },
+        {
+          "exception_id": "EX-DUP-000002",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 7.17
+        },
+        {
+          "exception_id": "EX-DUP-000003",
+          "rule_category": "duplicate",
+          "llm_category": "duplicate",
+          "agrees_with_rules": false,
+          "category_matches_rule": true,
+          "confidence": "high",
+          "fallback_used": false,
+          "fallback_reason": null,
+          "elapsed_seconds": 5.85
+        }
+      ]
+    }
+  ],
+  "winner": "phi3:latest",
+  "determinism": {
+    "model": "phi3:latest",
+    "repeats_per_exception": 3,
+    "exceptions_tested": 4,
+    "category_stable_pct": 100.0,
+    "confidence_stable_pct": 100.0,
+    "detail": [
+      {
+        "exception_id": "EX-MIL-000001",
+        "runs": [
+          {
+            "category": "missing_in_ledger",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_ledger",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_ledger",
+            "confidence": "high",
+            "fallback_used": false
+          }
+        ],
+        "category_stable": true,
+        "confidence_stable": true
+      },
+      {
+        "exception_id": "EX-MIL-000002",
+        "runs": [
+          {
+            "category": "missing_in_ledger",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_ledger",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_ledger",
+            "confidence": "high",
+            "fallback_used": false
+          }
+        ],
+        "category_stable": true,
+        "confidence_stable": true
+      },
+      {
+        "exception_id": "EX-MIG-000001",
+        "runs": [
+          {
+            "category": "missing_in_gateway",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_gateway",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_gateway",
+            "confidence": "high",
+            "fallback_used": false
+          }
+        ],
+        "category_stable": true,
+        "confidence_stable": true
+      },
+      {
+        "exception_id": "EX-MIG-000003",
+        "runs": [
+          {
+            "category": "missing_in_gateway",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_gateway",
+            "confidence": "high",
+            "fallback_used": false
+          },
+          {
+            "category": "missing_in_gateway",
+            "confidence": "high",
+            "fallback_used": false
+          }
+        ],
+        "category_stable": true,
+        "confidence_stable": true
+      }
+    ]
+  },
+  "meets_consistency_bar": true
+}

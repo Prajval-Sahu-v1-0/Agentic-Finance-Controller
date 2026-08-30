@@ -1,0 +1,182 @@
+[
+  {
+    "exception_id": "EX-MIL-000002",
+    "category": "missing_in_ledger",
+    "source": "gateway",
+    "gateway_record": {
+      "transaction_id": "rzp_live_yYDcOr1cOqXByB",
+      "reference_id": "PAY20240303000089",
+      "amount": "46675.21",
+      "currency": "INR",
+      "status": "settled",
+      "timestamp": "2024-03-03T03:49:26+00:00",
+      "counterparty": "raj@okicici"
+    },
+    "ledger_record": null,
+    "amount_delta_pct": null,
+    "timestamp_delta_hours": null,
+    "rule_explanation": "Gateway txn rzp_live_yYDcOr1cOqXByB (ref: PAY20240303000089, amount: INR 46675.21, status: settled) was settled by the payment gateway but has no matching entry in the merchant's ledger (normalised ref: 20240303000089). This may indicate a missed webhook, a database write failure on the merchant's backend, or a charge that was processed after the corresponding order was closed."
+  },
+  {
+    "exception_id": "EX-MIL-000001",
+    "category": "missing_in_ledger",
+    "source": "gateway",
+    "gateway_record": {
+      "transaction_id": "rzp_live_QwXqfAA9lsgusB",
+      "reference_id": "PAY20240319000090",
+      "amount": "48688.81",
+      "currency": "INR",
+      "status": "settled",
+      "timestamp": "2024-03-19T21:28:25+00:00",
+      "counterparty": "anita@hdfcbank"
+    },
+    "ledger_record": null,
+    "amount_delta_pct": null,
+    "timestamp_delta_hours": null,
+    "rule_explanation": "Gateway txn rzp_live_QwXqfAA9lsgusB (ref: PAY20240319000090, amount: INR 48688.81, status: settled) was settled by the payment gateway but has no matching entry in the merchant's ledger (normalised ref: 20240319000090). This may indicate a missed webhook, a database write failure on the merchant's backend, or a charge that was processed after the corresponding order was closed."
+  },
+  {
+    "exception_id": "EX-MIG-000002",
+    "category": "missing_in_gateway",
+    "source": "ledger",
+    "gateway_record": null,
+    "ledger_record": {
+      "transaction_id": "LED-2024-000088",
+      "reference_id": "ORD-2024-03-03-000088",
+      "amount": "39576.35",
+      "currency": "INR",
+      "status": "pending",
+      "timestamp": "2024-03-03T03:02:16+00:00",
+      "counterparty": "CUST-10035"
+    },
+    "amount_delta_pct": null,
+    "timestamp_delta_hours": null,
+    "rule_explanation": "Ledger txn LED-2024-000088 (ref: ORD-2024-03-03-000088, amount: INR 39576.35, status: pending) exists in the merchant's ledger but has no corresponding gateway settlement record (normalised ref: 20240303000088). This typically means the customer initiated but did not complete payment, the gateway rejected the transaction without notifying the merchant, or the record belongs to a different payment method not covered by this gateway export."
+  },
+  {
+    "exception_id": "EX-MIG-000003",
+    "category": "missing_in_gateway",
+    "source": "ledger",
+    "gateway_record": null,
+    "ledger_record": {
+      "transaction_id": "LED-2024-000086",
+      "reference_id": "ORD-2024-03-07-000086",
+      "amount": "3248.72",
+      "currency": "INR",
+      "status": "pending",
+      "timestamp": "2024-03-07T13:06:52+00:00",
+      "counterparty": "CUST-10033"
+    },
+    "amount_delta_pct": null,
+    "timestamp_delta_hours": null,
+    "rule_explanation": "Ledger txn LED-2024-000086 (ref: ORD-2024-03-07-000086, amount: INR 3248.72, status: pending) exists in the merchant's ledger but has no corresponding gateway settlement record (normalised ref: 20240307000086). This typically means the customer initiated but did not complete payment, the gateway rejected the transaction without notifying the merchant, or the record belongs to a different payment method not covered by this gateway export."
+  },
+  {
+    "exception_id": "EX-AMT-000015",
+    "category": "amount_mismatch",
+    "source": "gateway",
+    "gateway_record": {
+      "transaction_id": "rzp_live_EUVB5INM1MjeBs",
+      "reference_id": "PAY20240304000073",
+      "amount": "46142.40",
+      "currency": "INR",
+      "status": "settled",
+      "timestamp": "2024-03-04T15:52:34+00:00",
+      "counterparty": "kiran@ybl"
+    },
+    "ledger_record": null,
+    "amount_delta_pct": "3.0000",
+    "timestamp_delta_hours": 0.08,
+    "rule_explanation": "Gateway txn rzp_live_EUVB5INM1MjeBs (ref: PAY20240304000073, amount: INR 46142.40, status: settled) could not be matched due to an amount discrepancy. The closest candidate differs by 3.0000 % in amount and 0.1 h in timestamp \u2014 both beyond auto-match tolerances. Common causes: gateway processing fee deducted before settlement, partial refund applied in one source only, FX conversion rounding, or a data-entry error in the ledger."
+  },
+  {
+    "exception_id": "EX-AMT-000016",
+    "category": "amount_mismatch",
+    "source": "ledger",
+    "gateway_record": null,
+    "ledger_record": {
+      "transaction_id": "LED-2024-000073",
+      "reference_id": "ORD-2024-03-04-000073",
+      "amount": "47569.48",
+      "currency": "INR",
+      "status": "paid",
+      "timestamp": "2024-03-04T15:47:34+00:00",
+      "counterparty": "CUST-10031"
+    },
+    "amount_delta_pct": "3.0000",
+    "timestamp_delta_hours": 0.08,
+    "rule_explanation": "Ledger txn LED-2024-000073 (ref: ORD-2024-03-04-000073, amount: INR 47569.48, status: paid) could not be matched due to an amount discrepancy. The closest candidate differs by 3.0000 % in amount and 0.1 h in timestamp \u2014 both beyond auto-match tolerances. Common causes: gateway processing fee deducted before settlement, partial refund applied in one source only, FX conversion rounding, or a data-entry error in the ledger."
+  },
+  {
+    "exception_id": "EX-STL-000003",
+    "category": "stale_timing",
+    "source": "gateway",
+    "gateway_record": {
+      "transaction_id": "rzp_live_oOgKUivuNZQ8Dl",
+      "reference_id": "PAY20240301000085",
+      "amount": "39447.15",
+      "currency": "INR",
+      "status": "settled",
+      "timestamp": "2024-03-06T17:55:24+00:00",
+      "counterparty": "pooja@axl"
+    },
+    "ledger_record": null,
+    "amount_delta_pct": "0.0000",
+    "timestamp_delta_hours": 119.0,
+    "rule_explanation": "Gateway txn rzp_live_oOgKUivuNZQ8Dl (ref: PAY20240301000085, amount: INR 39447.15, status: settled) has a matching reference and near-identical amount in the other source, but the timestamps are too far apart to auto-match. The closest candidate's timestamp is 119.0 h (5.0 days) away from this record's timestamp. Typical causes: gateway T+2 settlement batch delay, IST-to-UTC timezone conversion error (off by 5 h 30 min), or the ledger capturing the order-creation time instead of the payment time."
+  },
+  {
+    "exception_id": "EX-STL-000004",
+    "category": "stale_timing",
+    "source": "ledger",
+    "gateway_record": null,
+    "ledger_record": {
+      "transaction_id": "LED-2024-000085",
+      "reference_id": "ORD-2024-03-01-000085",
+      "amount": "39447.15",
+      "currency": "INR",
+      "status": "paid",
+      "timestamp": "2024-03-01T18:55:24+00:00",
+      "counterparty": "CUST-10026"
+    },
+    "amount_delta_pct": "0.0000",
+    "timestamp_delta_hours": 119.0,
+    "rule_explanation": "Ledger txn LED-2024-000085 (ref: ORD-2024-03-01-000085, amount: INR 39447.15, status: paid) has a matching reference and near-identical amount in the other source, but the timestamps are too far apart to auto-match. The closest candidate's timestamp is 119.0 h (5.0 days) away from this record's timestamp. Typical causes: gateway T+2 settlement batch delay, IST-to-UTC timezone conversion error (off by 5 h 30 min), or the ledger capturing the order-creation time instead of the payment time."
+  },
+  {
+    "exception_id": "EX-DUP-000001",
+    "category": "duplicate",
+    "source": "gateway",
+    "gateway_record": {
+      "transaction_id": "rzp_live_KKkM3u5c1f6Vqn",
+      "reference_id": "PAY20240307000094",
+      "amount": "7735.47",
+      "currency": "INR",
+      "status": "settled",
+      "timestamp": "2024-03-07T01:00:29+00:00",
+      "counterparty": "amit@paytm"
+    },
+    "ledger_record": null,
+    "amount_delta_pct": "0.0000",
+    "timestamp_delta_hours": 0.35,
+    "rule_explanation": "Gateway txn rzp_live_KKkM3u5c1f6Vqn (ref: PAY20240307000094, amount: INR 7735.47, status: settled) shares the same normalised reference (20240307000094) with another record in the same source that was already successfully matched. This record is the extra copy and could not be paired. Likely causes: gateway retry storm, double-batch file inclusion, or a duplicate webhook delivery processed twice by the merchant."
+  },
+  {
+    "exception_id": "EX-DUP-000003",
+    "category": "duplicate",
+    "source": "gateway",
+    "gateway_record": {
+      "transaction_id": "rzp_live_zJhteCGhZIKViF",
+      "reference_id": "PAY20240318000093",
+      "amount": "11289.66",
+      "currency": "INR",
+      "status": "settled",
+      "timestamp": "2024-03-18T13:27:08+00:00",
+      "counterparty": "neha@apl"
+    },
+    "ledger_record": null,
+    "amount_delta_pct": "0.0000",
+    "timestamp_delta_hours": 0.28,
+    "rule_explanation": "Gateway txn rzp_live_zJhteCGhZIKViF (ref: PAY20240318000093, amount: INR 11289.66, status: settled) shares the same normalised reference (20240318000093) with another record in the same source that was already successfully matched. This record is the extra copy and could not be paired. Likely causes: gateway retry storm, double-batch file inclusion, or a duplicate webhook delivery processed twice by the merchant."
+  }
+]

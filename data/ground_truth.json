@@ -1,0 +1,1236 @@
+{
+  "metadata": {
+    "description": "Ground truth labels for the synthetic reconciliation dataset. Use this file ONLY to score the matcher's output \u2014 never as input to the matching engine itself.",
+    "generated_at": "2026-08-29T19:52:47.790167+00:00",
+    "seed": 42,
+    "fee_rate_pct": 3.0,
+    "total_gateway_records": 104,
+    "total_ledger_records": 102,
+    "total_logical_pairs": 100
+  },
+  "discrepancy_counts": {
+    "exact_match": 65,
+    "amount_mismatch": 10,
+    "timestamp_drift": 10,
+    "missing_gateway": 3,
+    "missing_ledger": 2,
+    "duplicate": 5,
+    "one_to_many": 3,
+    "many_to_one": 2
+  },
+  "pairs": [
+    {
+      "pair_id": "PAIR-0001",
+      "seq": 1,
+      "gateway_transaction_id": "rzp_live_nTP3fAbnFbmOHn",
+      "ledger_transaction_id": "LED-2024-000001",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 1 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0002",
+      "seq": 2,
+      "gateway_transaction_id": "rzp_live_VjArnVgxwvqcCh",
+      "ledger_transaction_id": "LED-2024-000002",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 2 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0003",
+      "seq": 3,
+      "gateway_transaction_id": "rzp_live_M2wleOV911xCZk",
+      "ledger_transaction_id": "LED-2024-000003",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 3 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0004",
+      "seq": 4,
+      "gateway_transaction_id": "rzp_live_6OLkTkx9NIQ0Wo",
+      "ledger_transaction_id": "LED-2024-000004",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 4 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0005",
+      "seq": 5,
+      "gateway_transaction_id": "rzp_live_e4JSnE2NiiUHUA",
+      "ledger_transaction_id": "LED-2024-000005",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 5 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0006",
+      "seq": 6,
+      "gateway_transaction_id": "rzp_live_FfcgMXAdx9G81a",
+      "ledger_transaction_id": "LED-2024-000006",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 6 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0007",
+      "seq": 7,
+      "gateway_transaction_id": "rzp_live_qNgAC72qFl41sN",
+      "ledger_transaction_id": "LED-2024-000007",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 7 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0008",
+      "seq": 8,
+      "gateway_transaction_id": "rzp_live_k754LEgw9YooJe",
+      "ledger_transaction_id": "LED-2024-000008",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 8 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0009",
+      "seq": 9,
+      "gateway_transaction_id": "rzp_live_HhO6kGL75UQSyP",
+      "ledger_transaction_id": "LED-2024-000009",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 9 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0010",
+      "seq": 10,
+      "gateway_transaction_id": "rzp_live_hnuKoneNo41eoP",
+      "ledger_transaction_id": "LED-2024-000010",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 10 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0011",
+      "seq": 11,
+      "gateway_transaction_id": "rzp_live_2JpDzfOvz1dOOd",
+      "ledger_transaction_id": "LED-2024-000011",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 11 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0012",
+      "seq": 12,
+      "gateway_transaction_id": "rzp_live_lHilC2eY1gOHaf",
+      "ledger_transaction_id": "LED-2024-000012",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 12 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0013",
+      "seq": 13,
+      "gateway_transaction_id": "rzp_live_nydx9qWCA79ISj",
+      "ledger_transaction_id": "LED-2024-000013",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 13 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0014",
+      "seq": 14,
+      "gateway_transaction_id": "rzp_live_TdtdD5GdF0ee1z",
+      "ledger_transaction_id": "LED-2024-000014",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 14 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0015",
+      "seq": 15,
+      "gateway_transaction_id": "rzp_live_MzKG5mSoyPstUe",
+      "ledger_transaction_id": "LED-2024-000015",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 15 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0016",
+      "seq": 16,
+      "gateway_transaction_id": "rzp_live_enq522wjZRL9Oa",
+      "ledger_transaction_id": "LED-2024-000016",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 16 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0017",
+      "seq": 17,
+      "gateway_transaction_id": "rzp_live_6ihgIqLSmNqE40",
+      "ledger_transaction_id": "LED-2024-000017",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 17 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0018",
+      "seq": 18,
+      "gateway_transaction_id": "rzp_live_cui8kBRIg6Qjcw",
+      "ledger_transaction_id": "LED-2024-000018",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 18 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0019",
+      "seq": 19,
+      "gateway_transaction_id": "rzp_live_t3X13npgW2zMj5",
+      "ledger_transaction_id": "LED-2024-000019",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 19 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0020",
+      "seq": 20,
+      "gateway_transaction_id": "rzp_live_zl5WzPTpjRxcDm",
+      "ledger_transaction_id": "LED-2024-000020",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 20 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0021",
+      "seq": 21,
+      "gateway_transaction_id": "rzp_live_2nOyreVvFQ0ub2",
+      "ledger_transaction_id": "LED-2024-000021",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 21 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0022",
+      "seq": 22,
+      "gateway_transaction_id": "rzp_live_cKvWB9h3lcBGYQ",
+      "ledger_transaction_id": "LED-2024-000022",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 22 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0023",
+      "seq": 23,
+      "gateway_transaction_id": "rzp_live_5MPh3FPuRIlPxU",
+      "ledger_transaction_id": "LED-2024-000023",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 23 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0024",
+      "seq": 24,
+      "gateway_transaction_id": "rzp_live_HarAJOCBnD3Xkf",
+      "ledger_transaction_id": "LED-2024-000024",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 24 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0025",
+      "seq": 25,
+      "gateway_transaction_id": "rzp_live_f7otYjc9LVC2JS",
+      "ledger_transaction_id": "LED-2024-000025",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 25 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0026",
+      "seq": 26,
+      "gateway_transaction_id": "rzp_live_OaUVgAk7Gdp0CX",
+      "ledger_transaction_id": "LED-2024-000026",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 26 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0027",
+      "seq": 27,
+      "gateway_transaction_id": "rzp_live_3LSFZH3UDqpNVG",
+      "ledger_transaction_id": "LED-2024-000027",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 27 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0028",
+      "seq": 28,
+      "gateway_transaction_id": "rzp_live_rqtHioRRdzHzmA",
+      "ledger_transaction_id": "LED-2024-000028",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 28 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0029",
+      "seq": 29,
+      "gateway_transaction_id": "rzp_live_2JD6sy3ZHTX3Eq",
+      "ledger_transaction_id": "LED-2024-000029",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 29 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0030",
+      "seq": 30,
+      "gateway_transaction_id": "rzp_live_QzkChMbyIbNiCd",
+      "ledger_transaction_id": "LED-2024-000030",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 30 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0031",
+      "seq": 31,
+      "gateway_transaction_id": "rzp_live_u2r6AZDUd7ne7c",
+      "ledger_transaction_id": "LED-2024-000031",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 31 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0032",
+      "seq": 32,
+      "gateway_transaction_id": "rzp_live_bjhPInRVkLUhY7",
+      "ledger_transaction_id": "LED-2024-000032",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 32 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0033",
+      "seq": 33,
+      "gateway_transaction_id": "rzp_live_J4x6mKZpRsQXXJ",
+      "ledger_transaction_id": "LED-2024-000033",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 33 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0034",
+      "seq": 34,
+      "gateway_transaction_id": "rzp_live_wFv0Yg7NZRBT7q",
+      "ledger_transaction_id": "LED-2024-000034",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 34 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0035",
+      "seq": 35,
+      "gateway_transaction_id": "rzp_live_ZKtp5rBUJPuEuE",
+      "ledger_transaction_id": "LED-2024-000035",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 35 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0036",
+      "seq": 36,
+      "gateway_transaction_id": "rzp_live_2Rra6fSEVQOEXf",
+      "ledger_transaction_id": "LED-2024-000036",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 36 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0037",
+      "seq": 37,
+      "gateway_transaction_id": "rzp_live_PwIv9IvCtoStU6",
+      "ledger_transaction_id": "LED-2024-000037",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 37 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0038",
+      "seq": 38,
+      "gateway_transaction_id": "rzp_live_rKVL8ZswsRhcds",
+      "ledger_transaction_id": "LED-2024-000038",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 38 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0039",
+      "seq": 39,
+      "gateway_transaction_id": "rzp_live_garDv7p1heEJQj",
+      "ledger_transaction_id": "LED-2024-000039",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 39 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0040",
+      "seq": 40,
+      "gateway_transaction_id": "rzp_live_hVLXnGBB19sMLT",
+      "ledger_transaction_id": "LED-2024-000040",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 40 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0041",
+      "seq": 41,
+      "gateway_transaction_id": "rzp_live_foIjzQDcrr1eoq",
+      "ledger_transaction_id": "LED-2024-000041",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 41 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0042",
+      "seq": 42,
+      "gateway_transaction_id": "rzp_live_AHO4ZektUJrhQR",
+      "ledger_transaction_id": "LED-2024-000042",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 42 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0043",
+      "seq": 43,
+      "gateway_transaction_id": "rzp_live_ecAtpf7ZJ69Pqc",
+      "ledger_transaction_id": "LED-2024-000043",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 43 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0044",
+      "seq": 44,
+      "gateway_transaction_id": "rzp_live_4lKNEfvuP1uRr6",
+      "ledger_transaction_id": "LED-2024-000044",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 44 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0045",
+      "seq": 45,
+      "gateway_transaction_id": "rzp_live_phV1Za1CdGMEBd",
+      "ledger_transaction_id": "LED-2024-000045",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 45 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0046",
+      "seq": 46,
+      "gateway_transaction_id": "rzp_live_BRh8LojIIf94Ch",
+      "ledger_transaction_id": "LED-2024-000046",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 46 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0047",
+      "seq": 47,
+      "gateway_transaction_id": "rzp_live_FqZ8pIx5F21rWz",
+      "ledger_transaction_id": "LED-2024-000047",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 47 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0048",
+      "seq": 48,
+      "gateway_transaction_id": "rzp_live_TZJO1BEuVx518o",
+      "ledger_transaction_id": "LED-2024-000048",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 48 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0049",
+      "seq": 49,
+      "gateway_transaction_id": "rzp_live_cURYxPY8EcFK12",
+      "ledger_transaction_id": "LED-2024-000049",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 49 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0050",
+      "seq": 50,
+      "gateway_transaction_id": "rzp_live_ai18eWqMyeuPH7",
+      "ledger_transaction_id": "LED-2024-000050",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 50 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0051",
+      "seq": 51,
+      "gateway_transaction_id": "rzp_live_eN59UAgN2BR4cX",
+      "ledger_transaction_id": "LED-2024-000051",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 51 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0052",
+      "seq": 52,
+      "gateway_transaction_id": "rzp_live_pzQlkLxQEKoNCP",
+      "ledger_transaction_id": "LED-2024-000052",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 52 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0053",
+      "seq": 53,
+      "gateway_transaction_id": "rzp_live_jBvKNAp0mxDoJJ",
+      "ledger_transaction_id": "LED-2024-000053",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 53 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0054",
+      "seq": 54,
+      "gateway_transaction_id": "rzp_live_ya1W84UZ3WoXnl",
+      "ledger_transaction_id": "LED-2024-000054",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 54 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0055",
+      "seq": 55,
+      "gateway_transaction_id": "rzp_live_OZM4OtBJTfsUki",
+      "ledger_transaction_id": "LED-2024-000055",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 55 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0056",
+      "seq": 56,
+      "gateway_transaction_id": "rzp_live_Fqk467s1XDeUnP",
+      "ledger_transaction_id": "LED-2024-000056",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 56 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0057",
+      "seq": 57,
+      "gateway_transaction_id": "rzp_live_wXaHCPPKY6gob2",
+      "ledger_transaction_id": "LED-2024-000057",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 57 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0058",
+      "seq": 58,
+      "gateway_transaction_id": "rzp_live_ONCROhcc9hoHyx",
+      "ledger_transaction_id": "LED-2024-000058",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 58 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0059",
+      "seq": 59,
+      "gateway_transaction_id": "rzp_live_jzgEz6cwB61gQH",
+      "ledger_transaction_id": "LED-2024-000059",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 59 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0060",
+      "seq": 60,
+      "gateway_transaction_id": "rzp_live_86ZfnN8du9WmZI",
+      "ledger_transaction_id": "LED-2024-000060",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 60 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0061",
+      "seq": 61,
+      "gateway_transaction_id": "rzp_live_uj3a1iipkObaWo",
+      "ledger_transaction_id": "LED-2024-000061",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 61 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0062",
+      "seq": 62,
+      "gateway_transaction_id": "rzp_live_hAhdBwKCnMT4Os",
+      "ledger_transaction_id": "LED-2024-000062",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 62 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0063",
+      "seq": 63,
+      "gateway_transaction_id": "rzp_live_yQE4efLerNHu9G",
+      "ledger_transaction_id": "LED-2024-000063",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 63 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0064",
+      "seq": 64,
+      "gateway_transaction_id": "rzp_live_XhO2I1A3zZyTtt",
+      "ledger_transaction_id": "LED-2024-000064",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 64 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0065",
+      "seq": 65,
+      "gateway_transaction_id": "rzp_live_5eZffTYIKIuhvP",
+      "ledger_transaction_id": "LED-2024-000065",
+      "discrepancy_type": "exact_match",
+      "expected_match_status": "matched",
+      "introduced_delta": null,
+      "notes": "Amounts are identical. Gateway timestamp is 0-30 min after the ledger timestamp (normal sub-hour settlement lag). Reference IDs share sequence 65 but use different formatting prefixes (PAY... vs ORD-...) to simulate the most common real-world reference mismatch."
+    },
+    {
+      "pair_id": "PAIR-0066",
+      "seq": 66,
+      "gateway_transaction_id": "rzp_live_8LvJnOng0wVJY0",
+      "ledger_transaction_id": "LED-2024-000066",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "45800.60",
+        "gateway_amount": "44426.58",
+        "fee_deducted": "1374.02",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b91374.02). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0067",
+      "seq": 67,
+      "gateway_transaction_id": "rzp_live_LOQbqV5vliOeT8",
+      "ledger_transaction_id": "LED-2024-000067",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "32170.69",
+        "gateway_amount": "31205.57",
+        "fee_deducted": "965.12",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b9965.12). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0068",
+      "seq": 68,
+      "gateway_transaction_id": "rzp_live_AvwSWJfdjMPqPE",
+      "ledger_transaction_id": "LED-2024-000068",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "26571.09",
+        "gateway_amount": "25773.96",
+        "fee_deducted": "797.13",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b9797.13). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0069",
+      "seq": 69,
+      "gateway_transaction_id": "rzp_live_FvgQKGtn9dm6VV",
+      "ledger_transaction_id": "LED-2024-000069",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "13731.03",
+        "gateway_amount": "13319.10",
+        "fee_deducted": "411.93",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b9411.93). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0070",
+      "seq": 70,
+      "gateway_transaction_id": "rzp_live_UkxRFZXe1cb51J",
+      "ledger_transaction_id": "LED-2024-000070",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "6087.22",
+        "gateway_amount": "5904.60",
+        "fee_deducted": "182.62",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b9182.62). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0071",
+      "seq": 71,
+      "gateway_transaction_id": "rzp_live_rz7k6CQwBgBye1",
+      "ledger_transaction_id": "LED-2024-000071",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "35504.00",
+        "gateway_amount": "34438.88",
+        "fee_deducted": "1065.12",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b91065.12). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0072",
+      "seq": 72,
+      "gateway_transaction_id": "rzp_live_eNGmWv7OjgpkjV",
+      "ledger_transaction_id": "LED-2024-000072",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "16720.12",
+        "gateway_amount": "16218.52",
+        "fee_deducted": "501.60",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b9501.60). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0073",
+      "seq": 73,
+      "gateway_transaction_id": "rzp_live_EUVB5INM1MjeBs",
+      "ledger_transaction_id": "LED-2024-000073",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "47569.48",
+        "gateway_amount": "46142.40",
+        "fee_deducted": "1427.08",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b91427.08). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0074",
+      "seq": 74,
+      "gateway_transaction_id": "rzp_live_eCcwrN8fKxJ7Tc",
+      "ledger_transaction_id": "LED-2024-000074",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "2902.99",
+        "gateway_amount": "2815.90",
+        "fee_deducted": "87.09",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b987.09). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0075",
+      "seq": 75,
+      "gateway_transaction_id": "rzp_live_Djdg3vSFkpBBGj",
+      "ledger_transaction_id": "LED-2024-000075",
+      "discrepancy_type": "amount_mismatch",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_amount": "9493.15",
+        "gateway_amount": "9208.36",
+        "fee_deducted": "284.79",
+        "fee_rate_pct": "3.00"
+      },
+      "notes": "Gateway deducted a 2 % processing fee (\u20b9284.79). The ledger holds the gross order value; the gateway settled the net value. Amount delta is always negative (gateway < ledger)."
+    },
+    {
+      "pair_id": "PAIR-0076",
+      "seq": 76,
+      "gateway_transaction_id": "rzp_live_uLWOefQrSO42uK",
+      "ledger_transaction_id": "LED-2024-000076",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-19T02:24:14+00:00",
+        "gateway_timestamp": "2024-03-23T23:24:14+00:00",
+        "drift_days": 4.88,
+        "drift_seconds": 421200.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (421,200 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0077",
+      "seq": 77,
+      "gateway_transaction_id": "rzp_live_RyK6txXYPZTQGO",
+      "ledger_transaction_id": "LED-2024-000077",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-07T20:46:33+00:00",
+        "gateway_timestamp": "2024-03-12T19:46:33+00:00",
+        "drift_days": 4.96,
+        "drift_seconds": 428400.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (428,400 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0078",
+      "seq": 78,
+      "gateway_transaction_id": "rzp_live_t6vVl9jsWFHTGP",
+      "ledger_transaction_id": "LED-2024-000078",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-21T13:18:15+00:00",
+        "gateway_timestamp": "2024-03-26T17:18:15+00:00",
+        "drift_days": 5.17,
+        "drift_seconds": 446400.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (446,400 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0079",
+      "seq": 79,
+      "gateway_transaction_id": "rzp_live_lQM3ScwS8LUWoo",
+      "ledger_transaction_id": "LED-2024-000079",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-07T08:40:59+00:00",
+        "gateway_timestamp": "2024-03-12T15:40:59+00:00",
+        "drift_days": 5.29,
+        "drift_seconds": 457200.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (457,200 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0080",
+      "seq": 80,
+      "gateway_transaction_id": "rzp_live_9CrxG7YXipN2Ig",
+      "ledger_transaction_id": "LED-2024-000080",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-23T18:26:34+00:00",
+        "gateway_timestamp": "2024-03-28T12:26:34+00:00",
+        "drift_days": 4.75,
+        "drift_seconds": 410400.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (410,400 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0081",
+      "seq": 81,
+      "gateway_transaction_id": "rzp_live_jBFZf4Y25zyxxf",
+      "ledger_transaction_id": "LED-2024-000081",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-26T01:04:40+00:00",
+        "gateway_timestamp": "2024-03-30T16:04:40+00:00",
+        "drift_days": 4.62,
+        "drift_seconds": 399600.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (399,600 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0082",
+      "seq": 82,
+      "gateway_transaction_id": "rzp_live_0OXirZRiRBaepZ",
+      "ledger_transaction_id": "LED-2024-000082",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-11T21:36:23+00:00",
+        "gateway_timestamp": "2024-03-16T09:36:23+00:00",
+        "drift_days": 4.5,
+        "drift_seconds": 388800.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (388,800 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0083",
+      "seq": 83,
+      "gateway_transaction_id": "rzp_live_grscAXCg4KbFpi",
+      "ledger_transaction_id": "LED-2024-000083",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-27T15:24:11+00:00",
+        "gateway_timestamp": "2024-04-02T02:24:11+00:00",
+        "drift_days": 5.46,
+        "drift_seconds": 471600.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (471,600 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0084",
+      "seq": 84,
+      "gateway_transaction_id": "rzp_live_JlPGw7HWFb2cxx",
+      "ledger_transaction_id": "LED-2024-000084",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-21T20:05:58+00:00",
+        "gateway_timestamp": "2024-03-26T08:05:58+00:00",
+        "drift_days": 4.5,
+        "drift_seconds": 388800.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (388,800 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0085",
+      "seq": 85,
+      "gateway_transaction_id": "rzp_live_oOgKUivuNZQ8Dl",
+      "ledger_transaction_id": "LED-2024-000085",
+      "discrepancy_type": "timestamp_drift",
+      "expected_match_status": "partial",
+      "introduced_delta": {
+        "ledger_timestamp": "2024-03-01T18:55:24+00:00",
+        "gateway_timestamp": "2024-03-06T17:55:24+00:00",
+        "drift_days": 4.96,
+        "drift_seconds": 428400.0
+      },
+      "notes": "Gateway settlement was delayed by at least 4.5 day(s) (428,400 s total). Amounts are identical; only the timestamp gap exceeds the normal sub-hour tolerance window."
+    },
+    {
+      "pair_id": "PAIR-0086",
+      "seq": 86,
+      "gateway_transaction_id": null,
+      "ledger_transaction_id": "LED-2024-000086",
+      "discrepancy_type": "missing_gateway",
+      "expected_match_status": "unmatched_ledger",
+      "introduced_delta": null,
+      "notes": "Ledger recorded a pending payment; the gateway has no corresponding settlement record. Typical causes: customer abandoned the checkout before payment, or the gateway's success webhook was never delivered to the merchant."
+    },
+    {
+      "pair_id": "PAIR-0087",
+      "seq": 87,
+      "gateway_transaction_id": null,
+      "ledger_transaction_id": "LED-2024-000087",
+      "discrepancy_type": "missing_gateway",
+      "expected_match_status": "unmatched_ledger",
+      "introduced_delta": null,
+      "notes": "Ledger recorded a pending payment; the gateway has no corresponding settlement record. Typical causes: customer abandoned the checkout before payment, or the gateway's success webhook was never delivered to the merchant."
+    },
+    {
+      "pair_id": "PAIR-0088",
+      "seq": 88,
+      "gateway_transaction_id": null,
+      "ledger_transaction_id": "LED-2024-000088",
+      "discrepancy_type": "missing_gateway",
+      "expected_match_status": "unmatched_ledger",
+      "introduced_delta": null,
+      "notes": "Ledger recorded a pending payment; the gateway has no corresponding settlement record. Typical causes: customer abandoned the checkout before payment, or the gateway's success webhook was never delivered to the merchant."
+    },
+    {
+      "pair_id": "PAIR-0089",
+      "seq": 89,
+      "gateway_transaction_id": "rzp_live_yYDcOr1cOqXByB",
+      "ledger_transaction_id": null,
+      "discrepancy_type": "missing_ledger",
+      "expected_match_status": "unmatched_gateway",
+      "introduced_delta": null,
+      "notes": "Gateway processed and settled this payment, but the merchant's internal ledger has no record of it. Likely caused by a database write failure on the merchant side after the payment was confirmed."
+    },
+    {
+      "pair_id": "PAIR-0090",
+      "seq": 90,
+      "gateway_transaction_id": "rzp_live_QwXqfAA9lsgusB",
+      "ledger_transaction_id": null,
+      "discrepancy_type": "missing_ledger",
+      "expected_match_status": "unmatched_gateway",
+      "introduced_delta": null,
+      "notes": "Gateway processed and settled this payment, but the merchant's internal ledger has no record of it. Likely caused by a database write failure on the merchant side after the payment was confirmed."
+    },
+    {
+      "pair_id": "PAIR-0091",
+      "seq": 91,
+      "gateway_transaction_id": "rzp_live_BT4MANXdPzFUjb",
+      "gateway_duplicate_transaction_id": "rzp_live_0QBhoOw6cjBwBe",
+      "ledger_transaction_id": "LED-2024-000091",
+      "discrepancy_type": "duplicate",
+      "expected_match_status": "duplicate",
+      "introduced_delta": {
+        "shared_reference_id": "PAY20240321000091",
+        "original_gw_txn_id": "rzp_live_BT4MANXdPzFUjb",
+        "duplicate_gw_txn_id": "rzp_live_0QBhoOw6cjBwBe",
+        "timestamp_gap_seconds": 120.0
+      },
+      "notes": "Gateway emitted two settlement rows for reference PAY20240321000091. Both share the same amount and counterparty; only their transaction_id and timestamp differ. Caused by a gateway retry storm or double-batch file inclusion. The matcher should flag both gateway rows and the single ledger row as a DUPLICATE exception."
+    },
+    {
+      "pair_id": "PAIR-0092",
+      "seq": 92,
+      "gateway_transaction_id": "rzp_live_r7blG4hWRnLR9m",
+      "gateway_duplicate_transaction_id": "rzp_live_iekS9Y79PRIssj",
+      "ledger_transaction_id": "LED-2024-000092",
+      "discrepancy_type": "duplicate",
+      "expected_match_status": "duplicate",
+      "introduced_delta": {
+        "shared_reference_id": "PAY20240326000092",
+        "original_gw_txn_id": "rzp_live_r7blG4hWRnLR9m",
+        "duplicate_gw_txn_id": "rzp_live_iekS9Y79PRIssj",
+        "timestamp_gap_seconds": 120.0
+      },
+      "notes": "Gateway emitted two settlement rows for reference PAY20240326000092. Both share the same amount and counterparty; only their transaction_id and timestamp differ. Caused by a gateway retry storm or double-batch file inclusion. The matcher should flag both gateway rows and the single ledger row as a DUPLICATE exception."
+    },
+    {
+      "pair_id": "PAIR-0093",
+      "seq": 93,
+      "gateway_transaction_id": "rzp_live_XoEwJC8i2eySDz",
+      "gateway_duplicate_transaction_id": "rzp_live_zJhteCGhZIKViF",
+      "ledger_transaction_id": "LED-2024-000093",
+      "discrepancy_type": "duplicate",
+      "expected_match_status": "duplicate",
+      "introduced_delta": {
+        "shared_reference_id": "PAY20240318000093",
+        "original_gw_txn_id": "rzp_live_XoEwJC8i2eySDz",
+        "duplicate_gw_txn_id": "rzp_live_zJhteCGhZIKViF",
+        "timestamp_gap_seconds": 60.0
+      },
+      "notes": "Gateway emitted two settlement rows for reference PAY20240318000093. Both share the same amount and counterparty; only their transaction_id and timestamp differ. Caused by a gateway retry storm or double-batch file inclusion. The matcher should flag both gateway rows and the single ledger row as a DUPLICATE exception."
+    },
+    {
+      "pair_id": "PAIR-0094",
+      "seq": 94,
+      "gateway_transaction_id": "rzp_live_k5n6Grem7rMMfN",
+      "gateway_duplicate_transaction_id": "rzp_live_KKkM3u5c1f6Vqn",
+      "ledger_transaction_id": "LED-2024-000094",
+      "discrepancy_type": "duplicate",
+      "expected_match_status": "duplicate",
+      "introduced_delta": {
+        "shared_reference_id": "PAY20240307000094",
+        "original_gw_txn_id": "rzp_live_k5n6Grem7rMMfN",
+        "duplicate_gw_txn_id": "rzp_live_KKkM3u5c1f6Vqn",
+        "timestamp_gap_seconds": 300.0
+      },
+      "notes": "Gateway emitted two settlement rows for reference PAY20240307000094. Both share the same amount and counterparty; only their transaction_id and timestamp differ. Caused by a gateway retry storm or double-batch file inclusion. The matcher should flag both gateway rows and the single ledger row as a DUPLICATE exception."
+    },
+    {
+      "pair_id": "PAIR-0095",
+      "seq": 95,
+      "gateway_transaction_id": "rzp_live_3HNspYzCQjzCvi",
+      "gateway_duplicate_transaction_id": "rzp_live_1t9vyVFgohBid6",
+      "ledger_transaction_id": "LED-2024-000095",
+      "discrepancy_type": "duplicate",
+      "expected_match_status": "duplicate",
+      "introduced_delta": {
+        "shared_reference_id": "PAY20240321000095",
+        "original_gw_txn_id": "rzp_live_3HNspYzCQjzCvi",
+        "duplicate_gw_txn_id": "rzp_live_1t9vyVFgohBid6",
+        "timestamp_gap_seconds": 300.0
+      },
+      "notes": "Gateway emitted two settlement rows for reference PAY20240321000095. Both share the same amount and counterparty; only their transaction_id and timestamp differ. Caused by a gateway retry storm or double-batch file inclusion. The matcher should flag both gateway rows and the single ledger row as a DUPLICATE exception."
+    },
+    {
+      "pair_id": "PAIR-0096",
+      "seq": 96,
+      "gateway_transaction_id": "rzp_live_5Slj9C2EfyCoKd",
+      "ledger_transaction_ids": [
+        "LED-2024-000097",
+        "LED-2024-000098"
+      ],
+      "ledger_transaction_id": null,
+      "discrepancy_type": "one_to_many",
+      "expected_match_status": "grouped_one_to_many",
+      "introduced_delta": {
+        "batch_gateway_ref": "BATCH20240321000096",
+        "batch_amount": "85817.85",
+        "child_ledger_refs": [
+          "ORD-2024-03-21-000097",
+          "ORD-2024-03-21-000098"
+        ],
+        "child_amounts": [
+          "45125.31",
+          "40692.54"
+        ],
+        "n_children": 2
+      },
+      "notes": "Gateway issued a single batch settlement (ref: BATCH20240321000096) covering 2 individual ledger orders. The batch amount (INR 85817.85) equals the exact sum of the child order amounts. Phases 1+2 cannot match by ref because BATCH... and ORD-... references share no digit overlap. Phase 3 must discover the match via sum equality."
+    },
+    {
+      "pair_id": "PAIR-0097",
+      "seq": 99,
+      "gateway_transaction_id": "rzp_live_2TVwyJmIeFVr9Q",
+      "ledger_transaction_ids": [
+        "LED-2024-000100",
+        "LED-2024-000101"
+      ],
+      "ledger_transaction_id": null,
+      "discrepancy_type": "one_to_many",
+      "expected_match_status": "grouped_one_to_many",
+      "introduced_delta": {
+        "batch_gateway_ref": "BATCH20240314000099",
+        "batch_amount": "63977.20",
+        "child_ledger_refs": [
+          "ORD-2024-03-14-000100",
+          "ORD-2024-03-14-000101"
+        ],
+        "child_amounts": [
+          "42373.90",
+          "21603.30"
+        ],
+        "n_children": 2
+      },
+      "notes": "Gateway issued a single batch settlement (ref: BATCH20240314000099) covering 2 individual ledger orders. The batch amount (INR 63977.20) equals the exact sum of the child order amounts. Phases 1+2 cannot match by ref because BATCH... and ORD-... references share no digit overlap. Phase 3 must discover the match via sum equality."
+    },
+    {
+      "pair_id": "PAIR-0098",
+      "seq": 102,
+      "gateway_transaction_id": "rzp_live_FFciuDCLFuMk9T",
+      "ledger_transaction_ids": [
+        "LED-2024-000103",
+        "LED-2024-000104",
+        "LED-2024-000105"
+      ],
+      "ledger_transaction_id": null,
+      "discrepancy_type": "one_to_many",
+      "expected_match_status": "grouped_one_to_many",
+      "introduced_delta": {
+        "batch_gateway_ref": "BATCH20240319000102",
+        "batch_amount": "94759.28",
+        "child_ledger_refs": [
+          "ORD-2024-03-19-000103",
+          "ORD-2024-03-19-000104",
+          "ORD-2024-03-19-000105"
+        ],
+        "child_amounts": [
+          "46953.53",
+          "37772.76",
+          "10032.99"
+        ],
+        "n_children": 3
+      },
+      "notes": "Gateway issued a single batch settlement (ref: BATCH20240319000102) covering 3 individual ledger orders. The batch amount (INR 94759.28) equals the exact sum of the child order amounts. Phases 1+2 cannot match by ref because BATCH... and ORD-... references share no digit overlap. Phase 3 must discover the match via sum equality."
+    },
+    {
+      "pair_id": "PAIR-0099",
+      "seq": 106,
+      "gateway_transaction_ids": [
+        "rzp_live_wP8KXSQbD7WWJS",
+        "rzp_live_kMM0jQb6gbtjQz"
+      ],
+      "gateway_transaction_id": null,
+      "ledger_transaction_id": "LED-2024-000108",
+      "discrepancy_type": "many_to_one",
+      "expected_match_status": "grouped_many_to_one",
+      "introduced_delta": {
+        "payout_ledger_ref": "PAYOUT-2024-03-26-000106",
+        "total_amount": "50525.67",
+        "split_gateway_refs": [
+          "SPLIT20240326000106P1",
+          "SPLIT20240326000107P2"
+        ],
+        "split_amounts": [
+          "35466.12",
+          "15059.55"
+        ],
+        "n_parts": 2
+      },
+      "notes": "Customer split a single order (ledger ref: PAYOUT-2024-03-26-000106, amount: INR 50525.67) across 2 gateway transactions (e.g. partial UPI + partial card). Each split GW record uses a SPLIT... reference; the ledger uses a PAYOUT reference. No shared digit key exists between them. Phase 3 must find the match by summing the gateway parts."
+    },
+    {
+      "pair_id": "PAIR-0100",
+      "seq": 109,
+      "gateway_transaction_ids": [
+        "rzp_live_RGI9Dx7CHHP1QX",
+        "rzp_live_E7rs68VRQEDI5S"
+      ],
+      "gateway_transaction_id": null,
+      "ledger_transaction_id": "LED-2024-000111",
+      "discrepancy_type": "many_to_one",
+      "expected_match_status": "grouped_many_to_one",
+      "introduced_delta": {
+        "payout_ledger_ref": "PAYOUT-2024-03-30-000109",
+        "total_amount": "66067.12",
+        "split_gateway_refs": [
+          "SPLIT20240330000109P1",
+          "SPLIT20240330000110P2"
+        ],
+        "split_amounts": [
+          "23633.11",
+          "42434.01"
+        ],
+        "n_parts": 2
+      },
+      "notes": "Customer split a single order (ledger ref: PAYOUT-2024-03-30-000109, amount: INR 66067.12) across 2 gateway transactions (e.g. partial UPI + partial card). Each split GW record uses a SPLIT... reference; the ledger uses a PAYOUT reference. No shared digit key exists between them. Phase 3 must find the match by summing the gateway parts."
+    }
+  ]
+}
