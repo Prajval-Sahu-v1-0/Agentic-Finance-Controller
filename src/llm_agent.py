@@ -377,6 +377,23 @@ _VALID_CATEGORIES = {c.value for c in ExceptionCategory} | {
 _VALID_CONFIDENCE = {"high", "medium", "low"}
 
 
+class NoStructuredOutputError(Exception):
+    """
+    Raised when the raw text contains no JSON AND no individually
+    regex-matchable "key": "value" field at all — i.e. the model produced
+    no usable structured signal, as distinct from almost-valid-but-malformed
+    JSON that strategy 3 can still partially recover.
+
+    This must NOT be silently absorbed by defaulting ``category`` to the
+    rule engine's own category, because that makes "the model said nothing
+    coherent" indistinguishable from "the model agreed with the rule
+    engine" in the resulting agreement-rate metrics. Callers should catch
+    this alongside other parse failures and set ``fallback_used=True``
+    (which ``reason_about_exception`` / ``reason_about_pair`` already do
+    for any exception raised here).
+    """
+
+
 def _parse_llm_response(raw: str, fallback_category: str) -> dict:
     """
     Parse the model's text response into a clean dict.
@@ -386,7 +403,8 @@ def _parse_llm_response(raw: str, fallback_category: str) -> dict:
     1. Try json.loads() on the full response (ideal path).
     2. Try to extract a JSON object with regex (handles leading text / markdown).
     3. Fall back to regex field-by-field extraction from plain text.
-    4. Return a safe default dict if all parsing fails.
+    4. Raise NoStructuredOutputError if nothing in 1-3 found anything at
+       all — never silently default to "agrees with rules."
     """
     # --- Strategy 1: full JSON ---
     try:
@@ -405,28 +423,29 @@ def _parse_llm_response(raw: str, fallback_category: str) -> dict:
             pass
 
     # --- Strategy 3: regex field extraction ---
-    agrees = True
     agrees_m = re.search(r'"agrees_with_rules"\s*:\s*(true|false)', raw, re.IGNORECASE)
-    if agrees_m:
-        agrees = agrees_m.group(1).lower() == "true"
+    cat_m    = re.search(r'"category"\s*:\s*"([a-z_]+)"', raw, re.IGNORECASE)
+    conf_m   = re.search(r'"confidence"\s*:\s*"(high|medium|low)"', raw, re.IGNORECASE)
+    expl_m   = re.search(r'"explanation"\s*:\s*"(.*?)"', raw, re.DOTALL)
+
+    if not any((agrees_m, cat_m, conf_m, expl_m)):
+        # No JSON, and not even one recognisable "key": "value" fragment —
+        # this is an absence of structured output, not a formatting slip.
+        raise NoStructuredOutputError(
+            f"No JSON object and no individual field found in raw output "
+            f"(first 120 chars: {raw[:120]!r})"
+        )
+
+    agrees = agrees_m.group(1).lower() == "true" if agrees_m else True
 
     cat = fallback_category
-    cat_m = re.search(
-        r'"category"\s*:\s*"([a-z_]+)"', raw, re.IGNORECASE
-    )
     if cat_m and cat_m.group(1) in _VALID_CATEGORIES:
         cat = cat_m.group(1)
 
-    conf = "medium"
-    conf_m = re.search(r'"confidence"\s*:\s*"(high|medium|low)"', raw, re.IGNORECASE)
-    if conf_m:
-        conf = conf_m.group(1).lower()
+    conf = conf_m.group(1).lower() if conf_m else "medium"
 
     # Extract explanation: grab text between "explanation": " ... "
-    expl = ""
-    expl_m = re.search(r'"explanation"\s*:\s*"(.*?)"', raw, re.DOTALL)
-    if expl_m:
-        expl = expl_m.group(1).replace("\\n", " ").strip()
+    expl = expl_m.group(1).replace("\\n", " ").strip() if expl_m else ""
     if not expl:
         # Use first sentence of raw response as explanation
         expl = raw.split(".")[0].strip()[:300] or "See raw response."
