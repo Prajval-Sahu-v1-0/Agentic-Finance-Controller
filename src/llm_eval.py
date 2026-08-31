@@ -105,6 +105,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--determinism-sample", type=int, default=4, metavar="N",
                          help="Exceptions used for the determinism check (default: 4).")
     parser.add_argument("--timeout", type=float, default=120.0, metavar="SECONDS")
+    parser.add_argument("--data-dir", type=Path, default=DATA_DIR, metavar="DIR",
+                         help="Directory to load {prefix}gateway_records.json etc. from "
+                              "(default: data/ — the synthetic dataset with a proven-accurate "
+                              "rule engine). Use with --prefix to evaluate against a mapped "
+                              "external dataset, e.g. --data-dir data/external/processed "
+                              "--prefix benchrec_.")
+    parser.add_argument("--prefix", type=str, default="", metavar="STR",
+                         help="Filename prefix for --data-dir's input files (default: '').")
+    parser.add_argument("--skip-determinism", action="store_true",
+                         help="Skip the repeated-call determinism check (e.g. when it was already "
+                              "established on another dataset and you just want the model comparison).")
     return parser
 
 
@@ -118,9 +129,11 @@ def _stratified_sample(exceptions: list[ExceptionRecord], per_category: int) -> 
     return sample
 
 
-def _load_exceptions() -> list[ExceptionRecord]:
-    gw  = load_gateway_records()
-    led = load_ledger_records()
+def _load_exceptions(data_dir: Path = DATA_DIR, prefix: str = "") -> list[ExceptionRecord]:
+    gw_path  = data_dir / f"{prefix}gateway_records.json"
+    led_path = data_dir / f"{prefix}ledger_records.json"
+    gw  = load_gateway_records(gw_path)
+    led = load_ledger_records(led_path)
     result = ReconciliationEngine().run(gw, led)
     return classify(result.unresolved)
 
@@ -230,9 +243,18 @@ def main(argv: Optional[list[str]] = None) -> None:
         sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
 
     args = build_parser().parse_args(argv)
+    is_synthetic = args.data_dir == DATA_DIR and args.prefix == ""
 
-    print("[llm_eval] Loading synthetic dataset and classifying exceptions ...")
-    exceptions = _load_exceptions()
+    print(f"[llm_eval] Loading dataset from {args.data_dir} (prefix={args.prefix!r}) and classifying exceptions ...")
+    if not is_synthetic:
+        print(
+            "[llm_eval] NOTE: on a non-synthetic dataset, 'category agreement' means agreement "
+            "with the RULE ENGINE's own category, not necessarily the ground-truth oracle — the "
+            "rule engine's exception precision on BenchRec, e.g., is far below 100% (see "
+            "report.py's ground_truth_accuracy). This measures LLM<->rule-engine consistency, "
+            "not LLM<->ground-truth accuracy, on non-synthetic data."
+        )
+    exceptions = _load_exceptions(args.data_dir, args.prefix)
     sample = _stratified_sample(exceptions, args.per_category)
     print(f"[llm_eval] {len(exceptions)} total exceptions; evaluating on a stratified sample of {len(sample)}.")
     for cat in ExceptionCategory:
@@ -240,7 +262,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         print(f"    {cat.value:<20} {n}")
     print()
 
-    sample_path = DATA_DIR / "llm_eval_sample.json"
+    sample_path = args.data_dir / f"{args.prefix}llm_eval_sample.json"
     export_sample(sample, sample_path)
     print(f"[llm_eval] Sample exported to {sample_path.resolve()} for use by external testing environments.\n")
 
@@ -262,22 +284,25 @@ def main(argv: Optional[list[str]] = None) -> None:
     print(f"[llm_eval] Winner: {winner['model']}")
     print()
 
-    determinism_sample = sample[: args.determinism_sample]
-    print(
-        f"[llm_eval] Running determinism check on {winner['model']}: "
-        f"{len(determinism_sample)} exceptions x {args.repeats} repeats ..."
-    )
-    determinism = evaluate_determinism(winner["model"], determinism_sample, args.repeats, args.timeout)
-    print(
-        f"[llm_eval] Category stable across repeats: {determinism['category_stable_pct']}% | "
-        f"Confidence stable: {determinism['confidence_stable_pct']}%"
-    )
-    print()
+    if args.skip_determinism:
+        determinism = {"category_stable_pct": None, "confidence_stable_pct": None, "skipped": True}
+    else:
+        determinism_sample = sample[: args.determinism_sample]
+        print(
+            f"[llm_eval] Running determinism check on {winner['model']}: "
+            f"{len(determinism_sample)} exceptions x {args.repeats} repeats ..."
+        )
+        determinism = evaluate_determinism(winner["model"], determinism_sample, args.repeats, args.timeout)
+        print(
+            f"[llm_eval] Category stable across repeats: {determinism['category_stable_pct']}% | "
+            f"Confidence stable: {determinism['confidence_stable_pct']}%"
+        )
+        print()
 
     threshold_ok = (
         winner["parse_reliability_pct"] >= 95
         and (winner["category_agreement_pct"] or 0) >= 90
-        and (determinism["category_stable_pct"] or 0) >= 90
+        and (determinism["category_stable_pct"] is None or determinism["category_stable_pct"] >= 90)
     )
     print("VERDICT")
     print("=" * 88)
@@ -301,7 +326,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         "determinism"       : determinism,
         "meets_consistency_bar": threshold_ok,
     }
-    out_path = DATA_DIR / "llm_eval_report.json"
+    out_path = args.data_dir / f"{args.prefix}llm_eval_report.json"
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"\nFull report written to {out_path.resolve()}")
 
