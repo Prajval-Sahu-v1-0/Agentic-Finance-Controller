@@ -60,6 +60,14 @@ Implements a three-phase reconciliation cascade:
       The search is bounded by ``max_group_size`` (default 4) to keep
       combinatorial complexity manageable on typical batch sizes.
 
+      KNOWN LIMITATION: candidate entry into this phase requires an explicit
+      BATCH/SPLIT/PAYOUT reference-ID prefix (see ``_group_candidate_pools``),
+      a convention specific to our synthetic generator. Real-world data has
+      no such marker, so this phase is currently inert outside synthetic
+      data — confirmed empirically (0 grouped matches on the BenchRec
+      validation run despite ~1,500 genuine grouped pairs in its oracle).
+      See ``_group_candidate_pools``'s docstring for the fix plan.
+
   Unresolved
       Any record still unmatched after both phases.  Carries a ``reason`` tag
       (no_counterpart | tolerance_exceeded | duplicate_candidate) so the
@@ -1217,6 +1225,46 @@ class ReconciliationEngine:
         unresolved pass.  BATCH anchors may bring nearby ledger children into
         one-to-many matching; PAYOUT anchors may bring nearby gateway splits
         into many-to-one matching.
+
+        KNOWN LIMITATION — inert on real-world data without this convention
+        --------------------------------------------------------------------
+        The BATCH/SPLIT/PAYOUT prefix requirement is a convention specific
+        to our synthetic generator (see generator.py). Real-world exports —
+        including BenchRec, the external validation dataset — have no such
+        marker in their reference text, so this gate admits nothing and
+        Phase 3 never fires. Confirmed empirically: 0 grouped matches on
+        the BenchRec run, despite its oracle containing 1,164 genuine
+        one-to-many and 334 many-to-one groups (see benchrec_ground_truth.json's
+        discrepancy_counts) — those ~1,500 groups fall through to
+        missing_in_gateway/missing_in_ledger exceptions undetected.
+
+        This is distinct from the many-to-many exclusion documented in
+        benchrec_map.py (which is a scoring-methodology gap in report.py);
+        this one is a detection gap in the matcher itself.
+
+        Fix sketch, not yet implemented (deliberately deferred rather than
+        rushed — the previous incarnation of this phase had a real
+        precision incident from unguarded sum-matching, see EXCEPTION_SAFETY_MARGIN
+        in config.py and the module docstring's "Duplicate handling" history):
+          1. Add a second corroboration path that doesn't require a prefix:
+             restrict candidates to k=2 combinations only (BenchRec's grouped
+             shapes are dominated by size-2 groups) and require the SAME
+             mutual-uniqueness safeguard Phase 2.5/2.75 already use — accept
+             a pairing only if it's the anchor's single best sum-match AND
+             that pair's best anchor is symmetrically this one.
+          2. This is a real combinatorial-cost problem at scale: naively
+             pairing every unclaimed record against every other is
+             O(n^2) per anchor. Bucket candidates by (rounded) date first
+             (group_max_timestamp_spread_hours is only 24h, so same-day
+             buckets collapse the search space by orders of magnitude on a
+             multi-year dataset like BenchRec), then run a two-sum search
+             within each bucket rather than brute-force combinations.
+          3. Validate on BOTH datasets before trusting it: synthetic must
+             stay at 100%/100% precision/recall (regression tests already
+             cover this), and BenchRec's grouped-match precision must be
+             checked directly, not assumed — sum-matching without a
+             corroborating signal is exactly what caused the original
+             false-positive incident this phase was rewritten to fix.
         """
         batch_gw = [g for g in gateway_records if self._has_prefix(g, "BATCH")]
         group_gw = [

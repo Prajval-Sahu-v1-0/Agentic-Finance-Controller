@@ -82,7 +82,9 @@ python -m src.main --run --data-dir data/external/processed --prefix benchrec_
 6. **Exception classification**: everything still unresolved is sorted into `missing_in_ledger`, `missing_in_gateway`, `amount_mismatch`, `stale_timing`, or `duplicate`.
 7. **LLM reasoning (optional, `--use-llm`)**: each classified exception gets a local Ollama second opinion, and a sample of Phase 2.5/2.75 matches (the ones made without any reference-ID agreement) gets audited for precision — neither ever overrides the rule engine's output, and both fail open to rule-based output if Ollama is unreachable.
 
-On BenchRec (ICAIF 2023, real-world, 47k 1:1 pairs): Phase 1/2 alone score 0% match rate, since real bank/gateway reference text shares no digit sequence across sources. Phase 2.5 + 2.75 recover a 45.5% match rate at ~98% precision — see `src/benchrec_map.py` and `src/matcher.py` docstrings for the full validation story and known limitations (many-to-many groups excluded from scoring; recall is capped by how often amount+date+text alone can uniquely identify a transaction).
+On BenchRec (ICAIF 2023, real-world, 47k 1:1 pairs): Phase 1/2 alone score 0% match rate, since real bank/gateway reference text shares no digit sequence across sources. Phase 2.5 + 2.75 recover a 45.5% match rate at ~98% precision — see `src/benchrec_map.py` and `src/matcher.py` docstrings for the full validation story and known limitations:
+- Many-to-many groups (3,458 of them) are excluded from the mapped dataset entirely — `report.py`'s ground-truth scorer only supports 1:1, one-to-many, and many-to-one shapes.
+- **Phase 3 (grouped matching) never fires on BenchRec at all** — it gates entry on a literal `BATCH`/`SPLIT`/`PAYOUT` reference-ID prefix, a synthetic-generator convention real bank narration text never has. Confirmed empirically: 0 groups detected despite ~1,500 genuine one-to-many/many-to-one pairs in BenchRec's oracle. Fix plan documented in `_group_candidate_pools`'s docstring in `matcher.py` — deliberately not yet implemented, since a rushed sum-matching generalization is exactly what caused a real precision incident earlier in this project (see `EXCEPTION_SAFETY_MARGIN` in `config.py`).
 
 ## LLM tuning
 
@@ -109,6 +111,8 @@ Result as of the last run: **`phi3:latest`** beat qwen2.5:7b-instruct, qwen2.5:1
 - [x] External validation against BenchRec (ICAIF 2023 real-world benchmark)
 - [x] LLM reasoning layer (Ollama, few-shot prompted)
 - [x] LLM tuning: measured model choice + prompting consistency (`src/llm_eval.py`) — fine-tuning not warranted
+- [x] External model comparison: `mombalam/clearledgr-llama-financial-ai` (HF LoRA over Llama-3.1-8B) evaluated against phi3:latest on both datasets — 0% valid output rate across 18 calls, 25-50x slower; phi3 stays selected. See `clearledgr-eval/` (separate venv, not part of this repo).
+- [ ] Known gap: Phase 3 grouped matching is inert on real-world data (see `matcher.py`'s `_group_candidate_pools` docstring for the fix plan)
 - [ ] FastAPI REST endpoints
 - [ ] Dashboard UI
 - [ ] Fine-tuning (stretch goal, currently not needed — see LLM tuning above)
