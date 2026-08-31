@@ -64,13 +64,26 @@ python -m src.llm_eval
 
 ### Validating against BenchRec (external, real-world dataset)
 
+BenchRec ships two splits, and they behave differently — see results below.
+
 ```bash
 # Map data/external/raw/BenchRec_cash_v1.0_train.csv onto our schema
-python -m src.benchrec_map
-
-# Run the reconciliation pipeline against the mapped BenchRec data
+python -m src.benchrec_map --split train
 python -m src.main --run --data-dir data/external/processed --prefix benchrec_
+
+# Map the held-out test split instead (eval.csv + solution.csv)
+python -m src.benchrec_map --split eval
+python -m src.main --run --data-dir data/external/processed --prefix benchrec_eval_
 ```
+
+| | train split (47k 1:1 pairs) | eval/test split (15.7k 1:1 pairs)* |
+|---|---|---|
+| Match rate | 45.5% | 31.7% |
+| Match precision | ~98% | 76.0% |
+| Match recall | 46.5% | 45.5% |
+| Exception recall | 98.9% | 99.1% |
+
+*The eval split's own ground truth (`solution.csv`) is messier than train's: ~44% of its target labels are themselves ambiguous — many unrelated ledger rows share byte-identical description text, so `targetAllocation` doesn't resolve to a unique row. Those cases are excluded from scoring rather than guessed at (see `benchrec_map.py`'s "eval.csv + solution.csv mapping" section for the full reasoning) — the 15.7k pairs above are the ones we could score with confidence. That same widespread near-duplicate text is almost certainly why match precision drops on this split: it's a genuinely harder, noisier dataset than train.csv, not a regression in the matcher.
 
 ## Matching pipeline
 
