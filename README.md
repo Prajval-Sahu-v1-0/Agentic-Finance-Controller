@@ -105,6 +105,19 @@ The plan was always: prompt a local Ollama model with few-shot examples first, a
 
 Result as of the last run: **`phi3:latest`** beat qwen2.5:7b-instruct, qwen2.5:14b, and llama3:latest — all four hit 100% category agreement, but phi3 was fastest (~7s/call vs 13-87s) with zero parse or timeout fallbacks and 100% stable output across repeats. qwen2.5:14b was notably worse: 6x slower with a timeout-induced fallback and no accuracy gain. **Fine-tuning is not warranted** — it stays a stretch goal. Re-run `python -m src.llm_eval` after changing the few-shot examples in `prompts.py` or the local model roster; the choice isn't permanent.
 
+Also cross-checked against an external HF model (`mombalam/clearledgr-llama-financial-ai`, a LoRA fine-tune of Llama-3.1-8B) on both the synthetic and BenchRec datasets: 0% valid structured output across 18 calls, 25-50x slower. See `clearledgr-eval/` (a separate venv — not part of this repo) for the harness.
+
+## Guardrails
+
+`--use-llm` sends real transaction data to a model and surfaces its text to a human reviewer — two separate trust boundaries worth defending deliberately, not just "the model is usually right." See `src/llm_agent.py`'s module docstring for the full detail; summary:
+
+1. **Advisory only, never authoritative** — LLM output never mutates the rule engine's category, match status, or monetary figures. Proven by `test_reason_about_exception_never_mutates_input` in `tests/test_llm_agent.py`, not just asserted in a comment.
+2. **Prompt-injection mitigation** — `reference_id`/`counterparty` come from external gateway/ledger data (attacker-influenceable in a real deployment) and are truncated + control-character-stripped before entering a prompt, with an explicit "this is data, not instructions" delimiter around them.
+3. **Output isn't trusted as-is** — `category`/`confidence` are checked against fixed allowlists; `agrees_with_rules` goes through `_coerce_bool` rather than Python's `bool(x)`, which silently returns `True` for the non-empty string `"false"` — a real bug this replaced.
+4. **Explanation text is sanitized before display** — control/ANSI-escape characters stripped, length-capped, and Rich markup (`[...]`) escaped at render time in `report.py`, since Rich interprets bracketed text as style markup by default and a manipulated explanation could otherwise corrupt or spoof the console report.
+5. **Suspicious-directive detection** — the real risk in a finance tool isn't the model crashing, it's a manipulated or hallucinating model telling a reviewer to move money. `explanation` is scanned for account/routing/IBAN-shaped numbers and wire-transfer-style urgency language; a hit sets `flagged_suspicious=True` and renders as a loud, dedicated warning panel — never silently folded into a normal-looking row.
+6. **Cost/DoS bound** — `--llm-max-calls` caps how many records ever reach the model per run; the rest get a fallback result instead of another network call. Ollama being unreachable, timing out, or unparseable never blocks or crashes the pipeline — it always fails open to rule-based output (`fallback_used=True`).
+
 ## Tech Stack
 
 | Layer        | Technology          |
@@ -125,6 +138,8 @@ Result as of the last run: **`phi3:latest`** beat qwen2.5:7b-instruct, qwen2.5:1
 - [x] LLM reasoning layer (Ollama, few-shot prompted)
 - [x] LLM tuning: measured model choice + prompting consistency (`src/llm_eval.py`) — fine-tuning not warranted
 - [x] External model comparison: `mombalam/clearledgr-llama-financial-ai` (HF LoRA over Llama-3.1-8B) evaluated against phi3:latest on both datasets — 0% valid output rate across 18 calls, 25-50x slower; phi3 stays selected. See `clearledgr-eval/` (separate venv, not part of this repo).
+- [x] BenchRec eval/test-split validation (`--split eval`) — a genuinely held-out split with its own, messier ground truth; phi3 holds at 100%/100% there too
+- [x] LLM guardrails: advisory-only enforcement (tested), prompt-injection mitigation, output allowlisting + bool-coercion fix, explanation sanitization + Rich-markup escaping, suspicious-directive detection, cost/DoS bound — see "Guardrails" above
 - [ ] Known gap: Phase 3 grouped matching is inert on real-world data (see `matcher.py`'s `_group_candidate_pools` docstring for the fix plan)
 - [ ] FastAPI REST endpoints
 - [ ] Dashboard UI

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-30T21:42:36.014195+00:00",
+  "generated_at": "2026-08-31T19:41:24.158152+00:00",
   "engine_config": {
     "exact_timestamp_tolerance_hours": 1.0,
     "amount_tolerance_pct": "2.0",
@@ -50,7 +50,7 @@
       "count": 50,
       "rate_pct": 48.08
     },
-    "elapsed_ms": 4.41
+    "elapsed_ms": 3.81
   },
   "monetary_summary": {
     "currency": "INR",
@@ -95,47 +95,61 @@
     "override_count": 3,
     "overrides": [
       {
-        "exception_id": "EX-AMT-000019",
+        "exception_id": "EX-AMT-000005",
         "rule_category": "amount_mismatch",
         "llm_category": "amount_mismatch",
         "confidence": "high",
-        "explanation": "The gateway settled INR 46142.40, but the ledger shows a different amount, which is a 3% discrepancy. This is beyond the auto-match tolerance and suggests a genuine mismatch. Action: Investigate the settlement process for this transaction, as the mismatch could be due to an error in the gateway processing or a ledger entry mistake. Contact the counterparty for clarification and, if necessary, raise a dispute for the mismatched amount."
+        "explanation": "The gateway transaction rzp_live_EUVB5INM1MjeBs (INR 46,142.40) shows a 3% discrepancy from the closest ledger record (INR 47,500.00), which is beyond the auto-match tolerance of 2%. The timestamp difference of 0.08 hours is within the 0.5-hour tolerance. This mismatch suggests a potential error or miscommunication in the settlement process. Action: Investigate the settlement process for this transaction, verify the accuracy of the ledger record, and if necessary, raise a dispute with the counte\u2026",
+        "flagged_suspicious": false,
+        "flag_reason": null
       },
       {
-        "exception_id": "EX-AMT-000020",
+        "exception_id": "EX-AMT-000006",
         "rule_category": "amount_mismatch",
         "llm_category": "amount_mismatch",
         "confidence": "high",
-        "explanation": "The ledger transaction LED-2024-000073 (INR 47,569.48) shows a 3% amount discrepancy from the closest candidate, which is outside the auto-match tolerance. The timestamp difference of 0.08 hours is within the acceptable range. The rule explanation suggests a gateway processing fee deduction, but the amount difference is too significant to attribute solely to a standard fee. Action: Investigate the ledger and gateway records for any manual adjustments or errors that could explain the discrepancy. If no such adjustments are found, raise a dispute with the gateway for the mismatched amount."
+        "explanation": "The ledger transaction LED-2024-000073 (INR 47,569.48) shows a 3% discrepancy from the closest candidate, which is outside the auto-match tolerance. The timestamp difference of 0.08 hours is within the acceptable range. The rule explanation suggests a gateway processing fee deduction, but the amount difference is too large to be solely attributed to a standard fee. Action: Investigate the ledger and gateway records for any manual adjustments or errors that could explain the discrepancy. If no su\u2026",
+        "flagged_suspicious": false,
+        "flag_reason": null
       },
       {
-        "exception_id": "EX-AMT-000015",
+        "exception_id": "EX-AMT-000011",
         "rule_category": "amount_mismatch",
         "llm_category": "amount_mismatch",
         "confidence": "high",
-        "explanation": "The gateway transaction rzp_live_AvwSWJfdjMPqPE (INR 25,773.96) shows a 3% discrepancy from the closest ledger record (INR 26,577.96), which is beyond the auto-match tolerance of 2%. The timestamp difference of 0.38 hours (22 minutes) is also outside the 0.5-hour tolerance. This suggests a genuine mismatch, likely due to a processing fee or rounding error. Action: Investigate the fee structure with the gateway provider and, if necessary, raise a dispute for the mismatched amount, referencing PAY20240305000068."
+        "explanation": "The gateway transaction rzp_live_AvwSWJfdjMPqPE (INR 25,773.96) shows a 3% discrepancy from the expected amount, which is outside the standard 2% auto-match tolerance. The timestamp difference of 0.38 hours (22 minutes) is within the 1-hour tolerance. This mismatch suggests a potential error or miscommunication, as the rule engine's tolerance is not met. Action: Investigate the transaction for possible errors or miscommunications. If the amount is correct, confirm the transaction and raise a dis\u2026",
+        "flagged_suspicious": false,
+        "flag_reason": null
       }
     ],
     "samples": [
       {
-        "exception_id": "EX-AMT-000019",
+        "exception_id": "EX-AMT-000005",
         "category": "amount_mismatch",
         "confidence": "high",
-        "explanation": "The gateway settled INR 46142.40, but the ledger shows a different amount, which is a 3% discrepancy. This is beyond the auto-match tolerance and suggests a genuine mismatch. Action: Investigate the settlement process for this transaction, as the mismatch could be due to an error in the gateway processing or a ledger entry mistake. Contact the counterparty for clarification and, if necessary, raise a dispute for the mismatched amount."
+        "explanation": "The gateway transaction rzp_live_EUVB5INM1MjeBs (INR 46,142.40) shows a 3% discrepancy from the closest ledger record (INR 47,500.00), which is beyond the auto-match tolerance of 2%. The timestamp difference of 0.08 hours is within the 0.5-hour tolerance. This mismatch suggests a potential error or miscommunication in the settlement process. Action: Investigate the settlement process for this transaction, verify the accuracy of the ledger record, and if necessary, raise a dispute with the counte\u2026",
+        "flagged_suspicious": false,
+        "flag_reason": null
       },
       {
-        "exception_id": "EX-AMT-000020",
+        "exception_id": "EX-AMT-000006",
         "category": "amount_mismatch",
         "confidence": "high",
-        "explanation": "The ledger transaction LED-2024-000073 (INR 47,569.48) shows a 3% amount discrepancy from the closest candidate, which is outside the auto-match tolerance. The timestamp difference of 0.08 hours is within the acceptable range. The rule explanation suggests a gateway processing fee deduction, but the amount difference is too significant to attribute solely to a standard fee. Action: Investigate the ledger and gateway records for any manual adjustments or errors that could explain the discrepancy. If no such adjustments are found, raise a dispute with the gateway for the mismatched amount."
+        "explanation": "The ledger transaction LED-2024-000073 (INR 47,569.48) shows a 3% discrepancy from the closest candidate, which is outside the auto-match tolerance. The timestamp difference of 0.08 hours is within the acceptable range. The rule explanation suggests a gateway processing fee deduction, but the amount difference is too large to be solely attributed to a standard fee. Action: Investigate the ledger and gateway records for any manual adjustments or errors that could explain the discrepancy. If no su\u2026",
+        "flagged_suspicious": false,
+        "flag_reason": null
       },
       {
-        "exception_id": "EX-AMT-000015",
+        "exception_id": "EX-AMT-000011",
         "category": "amount_mismatch",
         "confidence": "high",
-        "explanation": "The gateway transaction rzp_live_AvwSWJfdjMPqPE (INR 25,773.96) shows a 3% discrepancy from the closest ledger record (INR 26,577.96), which is beyond the auto-match tolerance of 2%. The timestamp difference of 0.38 hours (22 minutes) is also outside the 0.5-hour tolerance. This suggests a genuine mismatch, likely due to a processing fee or rounding error. Action: Investigate the fee structure with the gateway provider and, if necessary, raise a dispute for the mismatched amount, referencing PAY20240305000068."
+        "explanation": "The gateway transaction rzp_live_AvwSWJfdjMPqPE (INR 25,773.96) shows a 3% discrepancy from the expected amount, which is outside the standard 2% auto-match tolerance. The timestamp difference of 0.38 hours (22 minutes) is within the 1-hour tolerance. This mismatch suggests a potential error or miscommunication, as the rule engine's tolerance is not met. Action: Investigate the transaction for possible errors or miscommunications. If the amount is correct, confirm the transaction and raise a dis\u2026",
+        "flagged_suspicious": false,
+        "flag_reason": null
       }
-    ]
+    ],
+    "suspicious_count": 0,
+    "suspicious_flags": []
   },
   "ground_truth_accuracy": {
     "oracle_pairs_evaluated": 100,

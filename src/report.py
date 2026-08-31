@@ -82,6 +82,7 @@ from typing import Optional
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from rich.markup import escape as _rich_escape
 from rich import box
 
 from src.exceptions import ExceptionCategory, ExceptionRecord
@@ -294,6 +295,8 @@ def compute_llm_review(
             "llm_category" : r.category,
             "confidence"   : r.confidence,
             "explanation"  : r.explanation,
+            "flagged_suspicious": r.flagged_suspicious,
+            "flag_reason"  : r.flag_reason,
         }
         for exc, r in zip(exceptions, llm_results)
         if not r.fallback_used and not r.agrees_with_rules
@@ -305,10 +308,22 @@ def compute_llm_review(
             "category"    : r.category,
             "confidence"  : r.confidence,
             "explanation" : r.explanation,
+            "flagged_suspicious": r.flagged_suspicious,
+            "flag_reason" : r.flag_reason,
         }
         for exc, r in zip(exceptions, llm_results)
         if not r.fallback_used
     ][:5]
+
+    suspicious = [
+        {
+            "exception_id": exc.exception_id,
+            "explanation" : r.explanation,
+            "flag_reason" : r.flag_reason,
+        }
+        for exc, r in zip(exceptions, llm_results)
+        if r.flagged_suspicious
+    ]
 
     return {
         "total_exceptions"    : len(llm_results),
@@ -318,6 +333,8 @@ def compute_llm_review(
         "override_count"      : len(overrides),
         "overrides"           : overrides,
         "samples"             : samples,
+        "suspicious_count"    : len(suspicious),
+        "suspicious_flags"    : suspicious,
     }
 
 
@@ -343,9 +360,22 @@ def compute_pair_audit(
             "engine_confidence"     : round(p.confidence, 3),
             "llm_confidence"        : r.confidence,
             "explanation"           : r.explanation,
+            "flagged_suspicious"    : r.flagged_suspicious,
+            "flag_reason"           : r.flag_reason,
         }
         for p, r in zip(pairs, results)
         if not r.fallback_used and not r.agrees_with_rules
+    ]
+
+    suspicious = [
+        {
+            "gateway_transaction_id": p.gateway_record.transaction_id,
+            "ledger_transaction_id" : p.ledger_record.transaction_id,
+            "explanation"           : r.explanation,
+            "flag_reason"           : r.flag_reason,
+        }
+        for p, r in zip(pairs, results)
+        if r.flagged_suspicious
     ]
 
     return {
@@ -354,6 +384,8 @@ def compute_pair_audit(
         "fallback_count"    : fallback_n,
         "agreement_rate_pct": round(agreeing / len(consulted) * 100, 1) if consulted else None,
         "flagged_as_coincidental": flagged,
+        "suspicious_count"  : len(suspicious),
+        "suspicious_flags"  : suspicious,
     }
 
 
@@ -600,6 +632,40 @@ def _assemble_report(
 # Console rendering
 # ---------------------------------------------------------------------------
 
+def _llm_suspicious_panel(flags: list[dict], id_key: str):
+    """
+    Build a deliberately loud warning panel for LLM output flagged by
+    ``_detect_suspicious_directive`` (see llm_agent.py's Guardrails section) —
+    explanation text that reads like a financial directive ("wire funds
+    immediately", account/IBAN-shaped numbers) rather than an analysis. This
+    is the guardrail against a manipulated or hallucinating model steering a
+    human reviewer into a fraudulent action; it is not a normal report
+    section and is styled to stand out accordingly.
+    """
+    from rich.console import Group
+
+    t = Table(title=f"[bold red]SUSPICIOUS LLM OUTPUT — {len(flags)} flagged[/bold red]", box=box.HEAVY, show_lines=True)
+    t.add_column("ID", min_width=14, style="bold")
+    t.add_column("Flagged reason", min_width=20)
+    t.add_column("Explanation (verbatim, do not act on without independent verification)")
+    for f in flags[:10]:
+        t.add_row(
+            _rich_escape(str(f.get(id_key, "?"))),
+            _rich_escape(f.get("flag_reason") or "?"),
+            _rich_escape(f.get("explanation", "")),
+        )
+    return Panel(
+        Group(
+            "[bold red]This LLM output contains language that reads like a financial directive "
+            "(e.g. an instruction to move money) rather than an analysis. It is advisory text "
+            "from a language model, not a verified instruction — do NOT act on it without "
+            "independent verification through your normal channels.[/bold red]",
+            t,
+        ),
+        border_style="bold red", box=box.HEAVY,
+    )
+
+
 def print_console_report(report: dict) -> None:
     """
     Render the full report as Rich-formatted tables to stdout.
@@ -732,8 +798,14 @@ def print_console_report(report: dict) -> None:
             t_ov.add_column("LLM Category", min_width=16)
             t_ov.add_column("Explanation")
             for ov in lr["overrides"][:5]:
-                t_ov.add_row(ov["exception_id"], ov["rule_category"], ov["llm_category"], ov["explanation"])
+                t_ov.add_row(
+                    _rich_escape(ov["exception_id"]), _rich_escape(ov["rule_category"]),
+                    _rich_escape(ov["llm_category"]), _rich_escape(ov["explanation"]),
+                )
             console.print(t_ov)
+
+        if lr.get("suspicious_count"):
+            console.print(_llm_suspicious_panel(lr["suspicious_flags"], "exception_id"))
 
     # ── LLM pair audit ───────────────────────────────────────────────
     if "llm_pair_audit" in report:
@@ -764,10 +836,13 @@ def print_console_report(report: dict) -> None:
             t_fl.add_column("Explanation")
             for row in pa["flagged_as_coincidental"][:5]:
                 t_fl.add_row(
-                    row["gateway_transaction_id"], row["ledger_transaction_id"],
-                    row["match_type"], row["explanation"],
+                    _rich_escape(row["gateway_transaction_id"]), _rich_escape(row["ledger_transaction_id"]),
+                    _rich_escape(row["match_type"]), _rich_escape(row["explanation"]),
                 )
             console.print(t_fl)
+
+        if pa.get("suspicious_count"):
+            console.print(_llm_suspicious_panel(pa["suspicious_flags"], "gateway_transaction_id"))
 
     # ── Ground truth accuracy ────────────────────────────────────────
     if "ground_truth_accuracy" in report:
