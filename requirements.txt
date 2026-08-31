@@ -1,23 +1,14 @@
-# Core framework
+# Core
 requests>=2.31.0
-fastapi>=0.111.0
-uvicorn[standard]>=0.30.0
-
-# Data validation
 pydantic>=2.7.0
 
-# Database
-# SQLite is included in Python's stdlib; SQLAlchemy provides the ORM layer
-sqlalchemy>=2.0.0
-
-# Data processing
+# Optional: only needed by src/inspect_benchrec.py for JSON/Excel/Parquet/
+# SQLite dataset inspection (CSV inspection, which is all BenchRec needs
+# today, does not require pandas).
 pandas>=2.2.0
-numpy>=1.26.0
 
-# CLI support
-typer>=0.12.0
+# CLI output
 rich>=13.7.0
 
 # Testing
 pytest>=8.2.0
-pytest-cov>=5.0.0
