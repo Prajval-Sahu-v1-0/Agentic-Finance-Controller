@@ -31,9 +31,14 @@ recon-agent/
     prompts.py                  # few-shot examples for LLM reasoning
     benchrec_map.py               # maps BenchRec's real-world CSVs onto our schema
     inspect_benchrec.py            # read-only structural inspection of raw BenchRec files
+    llm_eval.py                     # evaluates LLM model choice + prompting consistency
+    api.py                           # FastAPI demo layer wrapping the pipeline
     main.py                        # CLI entry point
+  static/
+    index.html             # dashboard served by src/api.py — no build step, no CDN deps
   tests/
     test_matcher.py               # matcher regression tests
+    test_llm_agent.py              # parser + guardrail regression tests
   requirements.txt
 ```
 
@@ -60,6 +65,9 @@ python -m src.main --run --use-llm
 # 6. Re-evaluate which local model to use, and whether prompting is
 #    consistent enough to skip fine-tuning (see "LLM tuning" below)
 python -m src.llm_eval
+
+# 7. Launch the demo API + dashboard (http://127.0.0.1:8000/)
+uvicorn src.api:app --reload
 ```
 
 ### Validating against BenchRec (external, real-world dataset)
@@ -118,6 +126,24 @@ Also cross-checked against an external HF model (`mombalam/clearledgr-llama-fina
 5. **Suspicious-directive detection** — the real risk in a finance tool isn't the model crashing, it's a manipulated or hallucinating model telling a reviewer to move money. `explanation` is scanned for account/routing/IBAN-shaped numbers and wire-transfer-style urgency language; a hit sets `flagged_suspicious=True` and renders as a loud, dedicated warning panel — never silently folded into a normal-looking row.
 6. **Cost/DoS bound** — `--llm-max-calls` caps how many records ever reach the model per run; the rest get a fallback result instead of another network call. Ollama being unreachable, timing out, or unparseable never blocks or crashes the pipeline — it always fails open to rule-based output (`fallback_used=True`).
 
+## Demo API + dashboard
+
+```bash
+uvicorn src.api:app --reload
+# open http://127.0.0.1:8000/
+```
+
+`src/api.py` is a thin FastAPI wrapper — it doesn't reimplement anything, every endpoint calls the same `ReconciliationEngine` / `classify` / `generate_report` / `reason_about_*` functions the CLI does. Pick a dataset (synthetic, BenchRec train, or BenchRec eval), optionally turn on LLM review, click **Run Reconciliation**, and `static/index.html` renders the match summary, monetary summary, exception breakdown, LLM review (including a loud dedicated panel if anything gets `flagged_suspicious`), pair audit, and ground-truth accuracy — no build step, no CDN dependencies, so it keeps working in a room with bad wifi.
+
+| Endpoint | What it does |
+|---|---|
+| `GET /health` | liveness check |
+| `GET /datasets` | which mapped datasets exist on disk |
+| `POST /reconcile` | run the pipeline (`{dataset, use_llm, llm_max_calls, ...}`) and return the full report |
+| `GET /report?dataset=...` | the last report generated this session for that dataset |
+
+Report state is in-memory per running server process (not a shared file) — see `api.py`'s module docstring for why (the two BenchRec splits would otherwise clobber each other's `report.json`).
+
 ## Tech Stack
 
 | Layer        | Technology          |
@@ -126,7 +152,8 @@ Also cross-checked against an external HF model (`mombalam/clearledgr-llama-fina
 | CLI          | argparse + Rich     |
 | LLM reasoning | Ollama (local)      |
 | Testing      | Pytest              |
-| API / DB (future) | FastAPI + SQLite (not yet built) |
+| Demo API     | FastAPI + Uvicorn   |
+| Dashboard    | Static HTML/CSS/vanilla JS (no build step, no CDN) |
 
 ## Status
 
@@ -140,7 +167,6 @@ Also cross-checked against an external HF model (`mombalam/clearledgr-llama-fina
 - [x] External model comparison: `mombalam/clearledgr-llama-financial-ai` (HF LoRA over Llama-3.1-8B) evaluated against phi3:latest on both datasets — 0% valid output rate across 18 calls, 25-50x slower; phi3 stays selected. See `clearledgr-eval/` (separate venv, not part of this repo).
 - [x] BenchRec eval/test-split validation (`--split eval`) — a genuinely held-out split with its own, messier ground truth; phi3 holds at 100%/100% there too
 - [x] LLM guardrails: advisory-only enforcement (tested), prompt-injection mitigation, output allowlisting + bool-coercion fix, explanation sanitization + Rich-markup escaping, suspicious-directive detection, cost/DoS bound — see "Guardrails" above
+- [x] FastAPI REST endpoints + dashboard UI (`src/api.py`, `static/index.html`) — thin wrapper around the existing pipeline, no reimplementation, no CDN dependencies
 - [ ] Known gap: Phase 3 grouped matching is inert on real-world data (see `matcher.py`'s `_group_candidate_pools` docstring for the fix plan)
-- [ ] FastAPI REST endpoints
-- [ ] Dashboard UI
 - [ ] Fine-tuning (stretch goal, currently not needed — see LLM tuning above)

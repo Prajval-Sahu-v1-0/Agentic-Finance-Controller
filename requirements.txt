@@ -10,5 +10,10 @@ pandas>=2.2.0
 # CLI output
 rich>=13.7.0
 
+# Demo API + dashboard (src/api.py) — thin REST wrapper around the
+# existing pipeline, for the buildathon submission demo
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+
 # Testing
 pytest>=8.2.0

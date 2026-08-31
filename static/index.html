@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>recon-agent — AI Finance Controller</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --panel: #ffffff;
+    --border: #e2e5ea;
+    --text: #1a1d23;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-dim: #eef2ff;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --yellow: #b45309;
+    --yellow-bg: #fffbeb;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    padding: 20px 28px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 28px 64px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .panel h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: var(--muted); }
+  select, input[type=number] {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    min-width: 120px;
+  }
+  .checkbox-field { display: flex; align-items: center; gap: 6px; padding-bottom: 6px; }
+  button {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button:hover:not(:disabled) { background: #1d4ed8; }
+
+  #status { margin-top: 12px; font-size: 13px; color: var(--muted); min-height: 18px; }
+  #status.error { color: var(--red); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: var(--bg);
+  }
+  .card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .card .value { font-size: 22px; font-weight: 700; margin-top: 4px; font-family: var(--mono); }
+  .card.green { background: var(--green-bg); }
+  .card.green .value { color: var(--green); }
+  .card.yellow { background: var(--yellow-bg); }
+  .card.yellow .value { color: var(--yellow); }
+  .card.red { background: var(--red-bg); }
+  .card.red .value { color: var(--red); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  td.num, th.num { text-align: right; font-family: var(--mono); }
+  tr:last-child td { border-bottom: none; }
+
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .pill.green { background: var(--green-bg); color: var(--green); }
+  .pill.yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .pill.red { background: var(--red-bg); color: var(--red); }
+
+  .warn-panel {
+    border: 2px solid var(--red);
+    background: var(--red-bg);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .warn-panel h2 { color: var(--red); margin-bottom: 8px; }
+  .warn-panel p { margin: 0 0 12px; color: var(--red); font-weight: 500; }
+  .warn-panel .item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+  .warn-panel .item .id { font-family: var(--mono); font-weight: 700; }
+  .warn-panel .item .reason { color: var(--red); font-size: 12px; margin-top: 2px; }
+
+  .explanation-row td { font-size: 12px; color: var(--text); max-width: 380px; }
+  #results { display: none; }
+  #empty { color: var(--muted); padding: 40px 0; text-align: center; }
+  .footnote { font-size: 12px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>recon-agent</h1>
+  <span class="sub">AI Finance Controller — multi-source reconciliation demo</span>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Run reconciliation</h2>
+    <div class="controls">
+      <div class="field">
+        <label for="dataset">Dataset</label>
+        <select id="dataset">
+          <option value="synthetic">Synthetic (ground-truth oracle)</option>
+          <option value="benchrec_train">BenchRec — train split</option>
+          <option value="benchrec_eval">BenchRec — eval/test split</option>
+        </select>
+      </div>
+      <div class="checkbox-field">
+        <input type="checkbox" id="useLlm">
+        <label for="useLlm">Use LLM review</label>
+      </div>
+      <div class="field">
+        <label for="maxCalls">LLM max calls</label>
+        <input type="number" id="maxCalls" value="10" min="1" max="200">
+      </div>
+      <button id="runBtn">Run Reconciliation</button>
+    </div>
+    <div id="status"></div>
+  </section>
+
+  <div id="empty">Choose a dataset and click <strong>Run Reconciliation</strong> to see results.</div>
+
+  <div id="results">
+    <section class="panel">
+      <h2>Match summary</h2>
+      <div class="cards" id="matchCards"></div>
+      <table style="margin-top:14px">
+        <thead><tr><th>Phase</th><th class="num">Count</th><th class="num">Rate</th></tr></thead>
+        <tbody id="phaseTable"></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Monetary summary</h2>
+      <table id="monetaryTable"></table>
+    </section>
+
+    <section class="panel">
+      <h2>Exception breakdown</h2>
+      <table>
+        <thead><tr><th>Category</th><th class="num">Count</th><th class="num">Share</th></tr></thead>
+        <tbody id="exceptionTable"></tbody>
+      </table>
+    </section>
+
+    <section class="panel" id="llmReviewPanel" style="display:none">
+      <h2>LLM review</h2>
+      <div class="cards" id="llmReviewCards"></div>
+      <table style="margin-top:14px" id="llmOverridesTable"></table>
+    </section>
+
+    <section class="panel" id="pairAuditPanel" style="display:none">
+      <h2>LLM pair audit</h2>
+      <div class="cards" id="pairAuditCards"></div>
+    </section>
+
+    <div id="suspiciousWarn"></div>
+
+    <section class="panel" id="gtPanel" style="display:none">
+      <h2>Ground truth accuracy</h2>
+      <div class="cards" id="gtMatchCards"></div>
+      <div class="cards" id="gtExceptionCards" style="margin-top:12px"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const el = (id) => document.getElementById(id);
+const fmtPct = (v) => v === null || v === undefined ? "—" : `${v}%`;
+const pctStyle = (v, good = 80, ok = 50) =>
+  v === null || v === undefined ? "" : v >= good ? "green" : v >= ok ? "yellow" : "red";
+
+function card(container, label, value, style = "") {
+  const div = document.createElement("div");
+  div.className = `card ${style}`;
+  div.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+  container.appendChild(div);
+}
+
+function renderMatchSummary(ms) {
+  const cards = el("matchCards");
+  cards.innerHTML = "";
+  card(cards, "Gateway records", ms.total_gateway_records);
+  card(cards, "Ledger records", ms.total_ledger_records);
+  card(cards, "Total matched", ms.total_matched.count, "green");
+  card(cards, "Match rate", fmtPct(ms.total_matched.rate_pct), pctStyle(ms.total_matched.rate_pct));
+  card(cards, "Unresolved", ms.unresolved.count, ms.unresolved.count > 0 ? "yellow" : "");
+
+  const phases = [
+    ["Exact (Phase 1)", ms.matched_exact],
+    ["Fuzzy (Phase 2)", ms.matched_fuzzy],
+    ["Content (Phase 2.5)", ms.matched_content],
+    ["Text (Phase 2.75)", ms.matched_text],
+  ];
+  const tbody = el("phaseTable");
+  tbody.innerHTML = "";
+  for (const [label, data] of phases) {
+    if (!data) continue;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${label}</td><td class="num">${data.count}</td><td class="num">${fmtPct(data.rate_pct)}</td>`;
+    tbody.appendChild(tr);
+  }
+  if (ms.matched_grouped && ms.matched_grouped.groups) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>Grouped (Phase 3) — ${ms.matched_grouped.groups} groups</td>` +
+      `<td class="num">${ms.matched_grouped.gateway_records}</td><td class="num">${fmtPct(ms.matched_grouped.rate_pct)}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderMonetary(mon) {
+  const t = el("monetaryTable");
+  const rows = [
+    ["Matched gateway value", mon.matched_gateway_value],
+    ["Matched ledger value", mon.matched_ledger_value],
+    ["Net amount delta (GW − Ledger)", mon.matched_amount_delta_total],
+    ["Unresolved gateway value", mon.unresolved_gateway_value],
+    ["Unresolved ledger value", mon.unresolved_ledger_value],
+  ];
+  t.innerHTML = rows.map(([label, val]) =>
+    `<tr><td>${label}</td><td class="num">${mon.currency} ${Number(val).toLocaleString()}</td></tr>`
+  ).join("");
+}
+
+function renderExceptions(exc) {
+  const tbody = el("exceptionTable");
+  tbody.innerHTML = exc.map((row) =>
+    `<tr><td>${row.category}</td><td class="num">${row.count}</td><td class="num">${row.share_pct}%</td></tr>`
+  ).join("") || `<tr><td colspan="3" style="color:var(--muted)">No exceptions.</td></tr>`;
+}
+
+function renderLlmReview(lr) {
+  const panel = el("llmReviewPanel");
+  if (!lr) { panel.style.display = "none"; return; }
+  panel.style.display = "";
+  const cards = el("llmReviewCards");
+  cards.innerHTML = "";
+  card(cards, "Consulted", `${lr.consulted} / ${lr.total_exceptions}`);
+  card(cards, "Fallback", lr.fallback_count, lr.fallback_count > 0 ? "yellow" : "");
+  card(cards, "Agreement with rules", fmtPct(lr.agreement_rate_pct), pctStyle(lr.agreement_rate_pct));
+  card(cards, "Overrides proposed", lr.override_count);
+
+  const t = el("llmOverridesTable");
+  if (lr.overrides && lr.overrides.length) {
+    t.innerHTML = `<thead><tr><th>Exception</th><th>Rule cat.</th><th>LLM cat.</th><th>Explanation</th></tr></thead><tbody>` +
+      lr.overrides.map((ov) =>
+        `<tr class="explanation-row"><td>${ov.exception_id}</td><td>${ov.rule_category}</td>` +
+        `<td>${ov.llm_category}</td><td>${escapeHtml(ov.explanation)}</td></tr>`
+      ).join("") + `</tbody>`;
+  } else {
+    t.innerHTML = "";
+  }
+}
+
+function renderPairAudit(pa) {
+  const panel = el("pairAuditPanel");
+  if (!pa) { panel.style.display = "none"; return; }
+  panel.style.display = "";
+  const cards = el("pairAuditCards");
+  cards.innerHTML = "";
+  card(cards, "Audited", `${pa.consulted} / ${pa.sample_size}`);
+  card(cards, "Fallback", pa.fallback_count, pa.fallback_count > 0 ? "yellow" : "");
+  card(cards, "Judged genuine", fmtPct(pa.agreement_rate_pct), pctStyle(pa.agreement_rate_pct));
+  card(cards, "Flagged coincidental", pa.flagged_as_coincidental.length, pa.flagged_as_coincidental.length > 0 ? "yellow" : "");
+}
+
+function renderSuspicious(lr, pa) {
+  const flags = [...(lr?.suspicious_flags || []), ...(pa?.suspicious_flags || [])];
+  const container = el("suspiciousWarn");
+  if (!flags.length) { container.innerHTML = ""; return; }
+  container.innerHTML = `
+    <div class="warn-panel">
+      <h2>⚠ Suspicious LLM output — ${flags.length} flagged</h2>
+      <p>This output contains language that reads like a financial directive rather than an analysis.
+         It is advisory text from a language model — do NOT act on it without independent verification.</p>
+      ${flags.map((f) => `
+        <div class="item">
+          <div class="id">${f.exception_id || f.gateway_transaction_id}</div>
+          <div class="reason">${escapeHtml(f.flag_reason || "")}</div>
+          <div>${escapeHtml(f.explanation || "")}</div>
+        </div>
+      `).join("")}
+    </div>`;
+}
+
+function renderGroundTruth(gta) {
+  const panel = el("gtPanel");
+  if (!gta) { panel.style.display = "none"; return; }
+  panel.style.display = "";
+  const mm = gta.match_metrics, em = gta.exception_metrics;
+  const mCards = el("gtMatchCards");
+  mCards.innerHTML = "<div style='grid-column:1/-1;font-size:12px;color:var(--muted);margin-bottom:2px'>Matching</div>";
+  card(mCards, "Precision", fmtPct(mm.precision_pct), pctStyle(mm.precision_pct));
+  card(mCards, "Recall", fmtPct(mm.recall_pct), pctStyle(mm.recall_pct));
+  card(mCards, "F1", fmtPct(mm.f1_pct), pctStyle(mm.f1_pct));
+
+  const eCards = el("gtExceptionCards");
+  eCards.innerHTML = "<div style='grid-column:1/-1;font-size:12px;color:var(--muted);margin-bottom:2px'>Exception classification</div>";
+  card(eCards, "Precision", fmtPct(em.precision_pct), pctStyle(em.precision_pct));
+  card(eCards, "Recall", fmtPct(em.recall_pct), pctStyle(em.recall_pct));
+  card(eCards, "Category accuracy", fmtPct(em.category_accuracy_pct), pctStyle(em.category_accuracy_pct));
+}
+
+function escapeHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s ?? "";
+  return d.innerHTML;
+}
+
+function renderReport(report) {
+  renderMatchSummary(report.match_summary);
+  renderMonetary(report.monetary_summary);
+  renderExceptions(report.exception_breakdown);
+  renderLlmReview(report.llm_review);
+  renderPairAudit(report.llm_pair_audit);
+  renderSuspicious(report.llm_review, report.llm_pair_audit);
+  renderGroundTruth(report.ground_truth_accuracy);
+  el("empty").style.display = "none";
+  el("results").style.display = "block";
+}
+
+async function run() {
+  const btn = el("runBtn");
+  const status = el("status");
+  btn.disabled = true;
+  status.className = "";
+  status.textContent = "Running reconciliation… this can take a while on large datasets or with --use-llm.";
+  try {
+    const resp = await fetch("/reconcile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset: el("dataset").value,
+        use_llm: el("useLlm").checked,
+        llm_max_calls: Number(el("maxCalls").value) || 10,
+      }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || `HTTP ${resp.status}`);
+    }
+    const report = await resp.json();
+    status.textContent = `Done — generated ${report.generated_at}`;
+    renderReport(report);
+  } catch (e) {
+    status.className = "error";
+    status.textContent = `Error: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+el("runBtn").addEventListener("click", run);
+</script>
+</body>
+</html>
