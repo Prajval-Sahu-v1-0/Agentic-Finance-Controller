@@ -60,13 +60,33 @@ Implements a three-phase reconciliation cascade:
       The search is bounded by ``max_group_size`` (default 4) to keep
       combinatorial complexity manageable on typical batch sizes.
 
-      KNOWN LIMITATION: candidate entry into this phase requires an explicit
+      Candidate entry into THIS marker-gated search requires an explicit
       BATCH/SPLIT/PAYOUT reference-ID prefix (see ``_group_candidate_pools``),
-      a convention specific to our synthetic generator. Real-world data has
-      no such marker, so this phase is currently inert outside synthetic
-      data — confirmed empirically (0 grouped matches on the BenchRec
+      a convention specific to our synthetic generator — real-world data has
+      no such marker, so on its own this phase is inert outside synthetic
+      data (confirmed empirically: 0 grouped matches on the BenchRec
       validation run despite ~1,500 genuine grouped pairs in its oracle).
-      See ``_group_candidate_pools``'s docstring for the fix plan.
+      See Phase 3b below for an attempted, opt-in-only real-world fallback.
+
+  Phase 3b — Unmarked Pair Grouping (opt-in, default OFF)
+      Applied to records still unmatched after Phase 3's marker-gated
+      search — i.e. real-world records with no BATCH/SPLIT/PAYOUT
+      convention to lean on. Restricted to size-2 groups only, bucketed by
+      calendar date with a hard pool-size cap (real transaction dates
+      cluster heavily rather than spreading evenly — BenchRec's busiest
+      single date had 856 records, not a handful), and gated by the same
+      mutual-uniqueness principle as Phase 2.5/2.75 generalised to pairs at
+      EXACT sum equality (no tolerance band — there is no marker to
+      corroborate a fuzzy match with).
+
+      Ships disabled by default: validated against BOTH datasets as the
+      original fix plan required, and even at exact-cent equality with
+      mutual uniqueness, it traded a real BenchRec match-precision drop
+      (98% -> 94.5%) for almost no recall gain (~1 true positive against
+      ~809 false positives) — apparently a real birthday-paradox risk at
+      tens-of-thousands-of-records scale, not a bug to patch away. See
+      ``ReconciliationEngine._unmarked_pair_grouped_phase`` and
+      ``config.enable_unmarked_grouping`` for the full numbers.
 
   Unresolved
       Any record still unmatched after both phases.  Carries a ``reason`` tag
@@ -111,7 +131,7 @@ import itertools
 import re
 import time
 from difflib import SequenceMatcher
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Literal, Optional
 
@@ -126,6 +146,7 @@ from src.config import (
     MATCHER_TEXT_SIMILARITY_MIN_MARGIN,
     MATCHER_TEXT_SIMILARITY_MIN_SCORE,
     MATCHER_TIMESTAMP_TOLERANCE_HOURS,
+    MATCHER_UNMARKED_GROUP_AMOUNT_TOLERANCE_PCT,
 )
 from src.schema import GatewayRecord, LedgerRecord
 
@@ -192,6 +213,34 @@ class MatchConfig(BaseModel):
     Setting this to 1 disables grouped matching entirely.
     C(n, k) combinations are tried for k in range(2, max_group_size+1), so
     keep this <= 4 for datasets up to ~200 unresolved records."""
+    enable_unmarked_grouping         : bool    = False
+    unmarked_group_amount_tolerance_pct: Decimal = MATCHER_UNMARKED_GROUP_AMOUNT_TOLERANCE_PCT
+    unmarked_group_max_local_pool_size : int    = 60
+    """Phase 3b (opt-in, default OFF): a size-2-only grouped-match search
+    for records with NO BATCH/SPLIT/PAYOUT marker (see
+    _group_candidate_pools's docstring for why Phase 3 needs this on
+    real-world data). Deliberately stricter than Phase 3's
+    group_tolerance_pct — defaults to EXACT sum equality, since there is no
+    marker to corroborate a fuzzy match with — plus a mutual-uniqueness
+    safeguard (an anchor is only matched if its date-bucketed local pool
+    contains EXACTLY ONE valid 2-combination) and a hard cap on that local
+    pool size, since real transaction dates cluster heavily (BenchRec's
+    busiest single date: 856 records) rather than spreading uniformly, so
+    an uncapped 3-day window can reach thousands of candidates and the
+    O(pool^2) combination check per anchor becomes prohibitive.
+
+    DEFAULTS TO OFF, not just cautious documentation: measured directly
+    against BenchRec (50k+ records) even AFTER the exact-equality fix, this
+    phase added ~809 new false-positive grouped matches for ~1 new true
+    positive (ground-truth match precision 98%->94.5%), and — before the
+    pool-size cap existed — took 8+ hours to run on a single date's
+    candidate explosion. The cap fixes the runtime; it does not fix the
+    precision problem, which appears to be a real birthday-paradox risk at
+    this scale (exact-cent 2-record sum coincidences are more common than
+    they sound across tens of thousands of real transactions). Turning
+    this on is a genuine precision/recall tradeoff to make deliberately,
+    not a free improvement — see README's "Matching pipeline" section for
+    the full numbers. See ReconciliationEngine._unmarked_pair_grouped_phase."""
 
     @model_validator(mode="after")
     def weights_sum_to_one(self) -> "MatchConfig":
@@ -562,6 +611,22 @@ class ReconciliationEngine:
                 for l in gm.ledger_records:
                     claimed_led.add(l.transaction_id)
 
+        # ── Phase 3b : Unmarked pair grouping (no BATCH/PAYOUT marker) ──
+        if self.config.enable_unmarked_grouping:
+            unclaimed_gw  = [
+                g for g in gateway_records if g.transaction_id not in claimed_gw
+            ]
+            unclaimed_led = [
+                l for l in ledger_records  if l.transaction_id not in claimed_led
+            ]
+            matched_unmarked = self._unmarked_pair_grouped_phase(unclaimed_gw, unclaimed_led)
+            matched_grouped = matched_grouped + matched_unmarked
+            for gm in matched_unmarked:
+                for g in gm.gateway_records:
+                    claimed_gw.add(g.transaction_id)
+                for l in gm.ledger_records:
+                    claimed_led.add(l.transaction_id)
+
         # ── Unresolved pass ───────────────────────────────────────────
         for key in all_keys:
             gw_candidates  = gw_index.get(key, [])
@@ -660,6 +725,9 @@ class ReconciliationEngine:
                     "enable_text_fallback"            : self.config.enable_text_fallback,
                     "text_similarity_min_score"       : self.config.text_similarity_min_score,
                     "text_similarity_min_margin"      : self.config.text_similarity_min_margin,
+                    "enable_unmarked_grouping"        : self.config.enable_unmarked_grouping,
+                    "unmarked_group_amount_tolerance_pct": str(self.config.unmarked_group_amount_tolerance_pct),
+                    "unmarked_group_max_local_pool_size": self.config.unmarked_group_max_local_pool_size,
                 },
             },
         )
@@ -1214,6 +1282,144 @@ class ReconciliationEngine:
 
         return results
 
+    def _unmarked_pair_grouped_phase(
+        self,
+        unclaimed_gw  : list[GatewayRecord],
+        unclaimed_led : list[LedgerRecord],
+    ) -> list[GroupedMatch]:
+        """
+        Phase 3b — size-2-only grouped-match search for records with NO
+        BATCH/SPLIT/PAYOUT marker. See ``config.enable_unmarked_grouping``'s
+        docstring and ``_group_candidate_pools``'s "Fix sketch" section for
+        why Phase 3 needs this at all on real-world data (it never fires
+        without it — confirmed empirically on BenchRec).
+
+        Bucketed by calendar date so the candidate pool per anchor stays
+        small even on a multi-year dataset: ``group_max_timestamp_spread_hours``
+        is only 24h, so nothing outside date-1..date+1 could ever pass the
+        timestamp check regardless of pool size. Within an anchor's local
+        pool, EVERY valid 2-combination is counted, not just the first one
+        found — the anchor is matched only if EXACTLY ONE exists. Zero
+        means no candidate; two or more means an ambiguous sum coincidence,
+        and both are left unresolved rather than guessed at. This is the
+        same mutual-uniqueness principle Phase 2.5/2.75 use, generalised
+        from "one candidate record" to "one candidate pair."
+
+        Runs strictly after Phase 3's marker-gated search, on whatever is
+        still unclaimed, so a BATCH/PAYOUT-corroborated match (a stronger
+        signal) always wins first.
+        """
+        if not unclaimed_gw or not unclaimed_led:
+            return []
+
+        tol_pct = self.config.unmarked_group_amount_tolerance_pct
+        now = datetime.now(timezone.utc)
+
+        def _date_key(record: GatewayRecord | LedgerRecord):
+            ts = record.timestamp
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            return ts.astimezone(timezone.utc).date()
+
+        led_buckets: dict = {}
+        for l in unclaimed_led:
+            led_buckets.setdefault(_date_key(l), []).append(l)
+
+        gw_buckets: dict = {}
+        for g in unclaimed_gw:
+            gw_buckets.setdefault(_date_key(g), []).append(g)
+
+        max_pool = self.config.unmarked_group_max_local_pool_size
+
+        def _local_pool(buckets: dict, center_date) -> Optional[list]:
+            """None means "too dense to search safely" — see
+            unmarked_group_max_local_pool_size's docstring. A busy 3-day
+            window on real-world data can hold thousands of candidates;
+            checking every 2-combination against thousands of others is an
+            O(n^2) blowup per anchor, and real transaction dates cluster
+            heavily (empirically: BenchRec's busiest single date had 856
+            ledger records, not the handful a uniform date spread would
+            suggest), so this cap is load-bearing, not decorative."""
+            pool = []
+            for offset in (-1, 0, 1):
+                pool.extend(buckets.get(center_date + timedelta(days=offset), []))
+                if len(pool) > max_pool:
+                    return None
+            return pool
+
+        def _valid_pairs(anchor, candidates: list) -> list:
+            """Every 2-combination from `candidates` whose amount sum is
+            within group_tolerance_pct of anchor.amount AND lies with the
+            anchor in one settlement window."""
+            valid = []
+            for a, b in itertools.combinations(candidates, 2):
+                combo_sum = a.amount + b.amount
+                dp = _amount_delta_pct(combo_sum, anchor.amount)
+                if dp <= tol_pct and self._timestamps_are_grouped([anchor, a, b]):
+                    valid.append((a, b, combo_sum, dp))
+            return valid
+
+        def _make_grouped(match_type, gw_group, led_group, gw_total, led_total, delta_pct) -> GroupedMatch:
+            conf = float(max(Decimal("0"), Decimal("1") - delta_pct / tol_pct)) if tol_pct else 1.0
+            return GroupedMatch(
+                match_type       = match_type,
+                gateway_records  = gw_group,
+                ledger_records   = led_group,
+                gateway_total    = gw_total,
+                ledger_total     = led_total,
+                amount_delta     = gw_total - led_total,
+                amount_delta_pct = delta_pct,
+                normalized_refs  = [self.normalize_ref(r.reference_id) for r in gw_group + led_group],
+                confidence       = conf,
+                matched_at       = now,
+            )
+
+        results  : list[GroupedMatch] = []
+        used_gw  : set[str] = set()
+        used_led : set[str] = set()
+
+        # one_to_many: 1 gateway anchor, 2 ledger candidates summing to it
+        for gw in unclaimed_gw:
+            if gw.transaction_id in used_gw:
+                continue
+            local_pool = _local_pool(led_buckets, _date_key(gw))
+            if local_pool is None:
+                continue  # too dense to search safely, see _local_pool
+            candidates = [
+                l for l in local_pool
+                if l.transaction_id not in used_led and self._timestamps_are_grouped([gw, l])
+            ]
+            pairs = _valid_pairs(gw, candidates)
+            if len(pairs) != 1:
+                continue
+            a, b, combo_sum, dp = pairs[0]
+            results.append(_make_grouped("one_to_many", [gw], [a, b], gw.amount, combo_sum, dp))
+            used_gw.add(gw.transaction_id)
+            used_led.add(a.transaction_id)
+            used_led.add(b.transaction_id)
+
+        # many_to_one: 1 ledger anchor, 2 gateway candidates summing to it
+        for led in unclaimed_led:
+            if led.transaction_id in used_led:
+                continue
+            local_pool = _local_pool(gw_buckets, _date_key(led))
+            if local_pool is None:
+                continue  # too dense to search safely, see _local_pool
+            candidates = [
+                g for g in local_pool
+                if g.transaction_id not in used_gw and self._timestamps_are_grouped([led, g])
+            ]
+            pairs = _valid_pairs(led, candidates)
+            if len(pairs) != 1:
+                continue
+            a, b, combo_sum, dp = pairs[0]
+            results.append(_make_grouped("many_to_one", [a, b], [led], combo_sum, led.amount, dp))
+            used_led.add(led.transaction_id)
+            used_gw.add(a.transaction_id)
+            used_gw.add(b.transaction_id)
+
+        return results
+
     def _group_candidate_pools(
         self,
         gateway_records: list[GatewayRecord],
@@ -1226,45 +1432,34 @@ class ReconciliationEngine:
         one-to-many matching; PAYOUT anchors may bring nearby gateway splits
         into many-to-one matching.
 
-        KNOWN LIMITATION — inert on real-world data without this convention
-        --------------------------------------------------------------------
+        Inert on real-world data without this convention
+        --------------------------------------------------
         The BATCH/SPLIT/PAYOUT prefix requirement is a convention specific
         to our synthetic generator (see generator.py). Real-world exports —
         including BenchRec, the external validation dataset — have no such
-        marker in their reference text, so this gate admits nothing and
-        Phase 3 never fires. Confirmed empirically: 0 grouped matches on
-        the BenchRec run, despite its oracle containing 1,164 genuine
+        marker in their reference text, so THIS gate admits nothing there.
+        Confirmed empirically: 0 grouped matches on the BenchRec run via
+        this path alone, despite its oracle containing 1,164 genuine
         one-to-many and 334 many-to-one groups (see benchrec_ground_truth.json's
-        discrepancy_counts) — those ~1,500 groups fall through to
-        missing_in_gateway/missing_in_ledger exceptions undetected.
+        discrepancy_counts).
 
         This is distinct from the many-to-many exclusion documented in
         benchrec_map.py (which is a scoring-methodology gap in report.py);
-        this one is a detection gap in the matcher itself.
-
-        Fix sketch, not yet implemented (deliberately deferred rather than
-        rushed — the previous incarnation of this phase had a real
-        precision incident from unguarded sum-matching, see EXCEPTION_SAFETY_MARGIN
-        in config.py and the module docstring's "Duplicate handling" history):
-          1. Add a second corroboration path that doesn't require a prefix:
-             restrict candidates to k=2 combinations only (BenchRec's grouped
-             shapes are dominated by size-2 groups) and require the SAME
-             mutual-uniqueness safeguard Phase 2.5/2.75 already use — accept
-             a pairing only if it's the anchor's single best sum-match AND
-             that pair's best anchor is symmetrically this one.
-          2. This is a real combinatorial-cost problem at scale: naively
-             pairing every unclaimed record against every other is
-             O(n^2) per anchor. Bucket candidates by (rounded) date first
-             (group_max_timestamp_spread_hours is only 24h, so same-day
-             buckets collapse the search space by orders of magnitude on a
-             multi-year dataset like BenchRec), then run a two-sum search
-             within each bucket rather than brute-force combinations.
-          3. Validate on BOTH datasets before trusting it: synthetic must
-             stay at 100%/100% precision/recall (regression tests already
-             cover this), and BenchRec's grouped-match precision must be
-             checked directly, not assumed — sum-matching without a
-             corroborating signal is exactly what caused the original
-             false-positive incident this phase was rewritten to fix.
+        this one is a detection gap in the matcher itself. An unmarked,
+        marker-free fallback (``ReconciliationEngine._unmarked_pair_grouped_phase``,
+        "Phase 3b") was built and validated against BOTH datasets, per the
+        original fix plan's own requirement — and the BenchRec result is
+        why it ships opt-in / default OFF, not as this gate's automatic
+        successor: even restricted to size-2 groups at EXACT sum equality
+        with a mutual-uniqueness guard, it traded a real precision hit
+        (BenchRec match precision 98% -> 94.5%) for almost no recall gain
+        (~1 new true positive against ~809 new false positives), and an
+        early uncapped version took 8+ hours on BenchRec's date-clustered
+        real data before a hard local-pool-size cap was added. See that
+        method's docstring and MatchConfig.enable_unmarked_grouping's
+        docstring for the full numbers. This remains a genuinely open gap:
+        the marker-free fallback that was tried does not safely close it
+        at real-world scale.
         """
         batch_gw = [g for g in gateway_records if self._has_prefix(g, "BATCH")]
         group_gw = [

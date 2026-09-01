@@ -33,3 +33,16 @@ MATCHER_CONTENT_TIMESTAMP_TOLERANCE_HOURS = 48.0
 # within that already-narrow window, not identify a match from scratch.
 MATCHER_TEXT_SIMILARITY_MIN_SCORE = 0.10
 MATCHER_TEXT_SIMILARITY_MIN_MARGIN = 0.03
+
+# Phase-3b (unmarked pair grouping — see matcher.py's
+# _unmarked_pair_grouped_phase) has no BATCH/SPLIT/PAYOUT marker to lean on
+# at all, unlike Phase 3's group_tolerance_pct=0.5% band, so it needs a
+# stronger signal than "close enough": exact-to-the-cent sum equality.
+# Empirically necessary, not a guess — an earlier version of this phase used
+# group_tolerance_pct (0.5%) and produced a real false positive on the
+# synthetic oracle: three UNRELATED exception pairs (two amount_mismatch,
+# one stale_timing) coincidentally summed to within 0.19% of each other and
+# got wrongly grouped, dropping synthetic precision/recall from 100%/100%
+# to 90%/90%. Exact equality closed that specific hole; mutual uniqueness
+# (see the phase's docstring) is the other half of the guard.
+MATCHER_UNMARKED_GROUP_AMOUNT_TOLERANCE_PCT = Decimal("0")

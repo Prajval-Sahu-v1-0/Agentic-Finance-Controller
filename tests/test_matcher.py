@@ -9,7 +9,7 @@ from src.config import (
     MATCHER_TIMESTAMP_TOLERANCE_HOURS,
 )
 from src.exceptions import ExceptionCategory, classify
-from src.matcher import ReconciliationEngine
+from src.matcher import MatchConfig, ReconciliationEngine
 from src.schema import GatewayRecord, LedgerRecord
 
 
@@ -106,12 +106,65 @@ def test_grouped_match_valid_case() -> None:
     assert not result.unresolved
 
 
-def test_grouped_match_rejects_false_positive() -> None:
+def test_ordinary_records_not_grouped_by_default() -> None:
+    """
+    Phase 3b (unmarked pair grouping) is opt-in, default OFF — see
+    MatchConfig.enable_unmarked_grouping's docstring for why: measured
+    directly against BenchRec, it traded a large precision hit (98% ->
+    94.5% match precision) for almost no recall gain. Without opting in,
+    an ordinary (no BATCH/SPLIT/PAYOUT marker) gateway record whose amount
+    happens to sum-match two ordinary ledger records must NOT be grouped —
+    this is the original false-positive-rejection invariant, preserved.
+    """
     result = ReconciliationEngine().run(
         [gateway("gw-ordinary", "PAY20240101000099", "100.00")],
         [
             ledger("led-1", "ORD-2024-01-01-000101", "40.00"),
             ledger("led-2", "ORD-2024-01-01-000102", "60.00"),
+        ],
+    )
+    assert not result.matched_grouped
+    assert {item.reason for item in result.unresolved} == {"no_counterpart"}
+
+
+def test_unmarked_pair_grouping_accepts_unique_case_when_enabled() -> None:
+    """
+    With enable_unmarked_grouping explicitly turned on: an ordinary gateway
+    record with NO BATCH/SPLIT/PAYOUT marker gets grouped-matched when it
+    has exactly one qualifying 2-ledger sum candidate at EXACT amount
+    equality — the mutual-uniqueness signal stands in for the marker
+    requirement. See the ambiguous-case test below for what's still
+    rejected even with this enabled.
+    """
+    config = MatchConfig(enable_unmarked_grouping=True)
+    result = ReconciliationEngine(config).run(
+        [gateway("gw-ordinary", "PAY20240101000099", "100.00")],
+        [
+            ledger("led-1", "ORD-2024-01-01-000101", "40.00"),
+            ledger("led-2", "ORD-2024-01-01-000102", "60.00"),
+        ],
+    )
+    assert len(result.matched_grouped) == 1
+    assert result.matched_grouped[0].match_type == "one_to_many"
+    assert not result.unresolved
+
+
+def test_unmarked_pair_grouping_rejects_ambiguous_case_when_enabled() -> None:
+    """
+    The safety property Phase 3b preserves even when enabled: when MORE
+    THAN ONE 2-ledger combination could explain the anchor's amount (a
+    genuine sum coincidence, not a unique corroborating signal), none of
+    them are guessed at — the same mutual-uniqueness principle as Phase
+    2.5/2.75, generalised to pairs.
+    """
+    config = MatchConfig(enable_unmarked_grouping=True)
+    result = ReconciliationEngine(config).run(
+        [gateway("gw-ordinary", "PAY20240101000099", "100.00")],
+        [
+            ledger("led-1", "ORD-2024-01-01-000101", "40.00"),
+            ledger("led-2", "ORD-2024-01-01-000102", "60.00"),
+            ledger("led-3", "ORD-2024-01-01-000103", "39.90"),
+            ledger("led-4", "ORD-2024-01-01-000104", "60.10"),
         ],
     )
     assert not result.matched_grouped
