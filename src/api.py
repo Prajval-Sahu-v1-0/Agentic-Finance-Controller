@@ -68,13 +68,8 @@ from src.ingest import IngestError, map_to_records, read_table, save_records
 from src.investigator import investigate_exception
 from src.llm_agent import LLMConfig, ask_agent, reason_about_exceptions_batch, reason_about_pairs_batch
 from src.matcher import MatchConfig, ReconciliationEngine
+from src.paths import DATA_DIR, PROCESSED_DIR, STATIC_DIR, UPLOADED_DIR
 from src.report import generate_report
-
-PROJECT_ROOT = Path(__file__).parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
-PROCESSED_DIR = DATA_DIR / "external" / "processed"
-UPLOADED_DIR = DATA_DIR / "uploaded"
-STATIC_DIR = PROJECT_ROOT / "static"
 
 app = FastAPI(
     title="recon-agent",

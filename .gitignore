@@ -17,6 +17,11 @@ data/external/processed/
 # User-uploaded datasets (src/api.py's POST /upload) — not committed
 data/uploaded/
 
+# PyInstaller build output — reproducible from recon-agent.spec, not
+# committed (dist/recon-agent.exe alone is ~45MB)
+build/
+dist/
+
 # OS
 .DS_Store
 Thumbs.db

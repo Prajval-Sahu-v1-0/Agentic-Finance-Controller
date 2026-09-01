@@ -37,13 +37,16 @@ recon-agent/
     llm_eval.py                     # evaluates LLM model choice + prompting consistency
     ingest.py                       # generic CSV/Excel account-sheet auto-mapping (no pre-formatting needed)
     investigator.py                 # autonomous multi-step tool-calling exception investigator
-    api.py                           # FastAPI demo layer wrapping the pipeline
+    paths.py                         # frozen-safe path resolution (see "Packaging as a standalone .exe")
+    api.py                            # FastAPI demo layer wrapping the pipeline
+    launcher.py                        # native desktop entry point for the packaged .exe
     main.py                        # CLI entry point
   static/
     index.html             # dashboard served by src/api.py — no build step, no CDN deps
   tests/
     test_matcher.py               # matcher regression tests
     test_llm_agent.py              # parser + guardrail regression tests
+  recon-agent.spec       # PyInstaller build spec — see "Packaging as a standalone .exe"
   requirements.txt
 ```
 
@@ -73,6 +76,11 @@ python -m src.llm_eval
 
 # 7. Launch the demo API + dashboard (http://127.0.0.1:8000/)
 uvicorn src.api:app --reload
+
+# 8. ...or launch it as a native desktop window instead of a browser tab
+#    (auto-generates a sample dataset for exploration when run from source
+#    like this; the packaged .exe below never does — see "Packaging" section)
+python -m src.launcher
 ```
 
 ### Validating against BenchRec (external, real-world dataset)
@@ -199,6 +207,26 @@ curl -X POST http://127.0.0.1:8000/investigate \
 
 Same guardrail philosophy as `/ask`, adapted for tool use: read-only and advisory only (the two tools can only read already-loaded records — nothing writes, matches, or classifies, and the conclusion is returned as data, never fed back into the matcher or `generate_report`); a bounded action space (exactly three tools, malformed/unknown calls return an error string to the model rather than executing anything); a hard step cap and per-search result cap for cost/context control; record data returned by tools is sanitized before re-entering the conversation, same as every other prompt builder; and the final finding/recommendation is scanned by the same suspicious-directive detector as `/ask`. See `src/investigator.py`'s module docstring for the full detail.
 
+## Packaging as a standalone .exe
+
+Offline-first by design: this ships as a single `.exe` a user runs on their own machine — a dedicated native application window (not a browser tab), no financial data ever leaving that machine. Core reconciliation needs nothing external at all; the LLM layer additionally needs a locally-running Ollama, which stays entirely on the user's machine too (the whole point of running phi3/qwen locally rather than calling a cloud API).
+
+```powershell
+# One-time setup, from the project root
+pip install -r requirements.txt
+pip install pyinstaller
+
+# Build (a few minutes)
+pyinstaller recon-agent.spec
+
+# Result: dist\recon-agent.exe (~45MB) — copy it anywhere and run it
+```
+
+What happens when a user runs it:
+1. `src/launcher.py` starts the API server in the background and opens it in a dedicated native window via **pywebview** — it wraps the OS's own web renderer (Edge WebView2 on Windows, already preinstalled on Windows 10/11, so nothing extra to ship). Closing the window stops the app.
+2. **No synthetic or demo data is bundled or generated in the packaged build** — the app starts empty, ready for the user's own files via drag-and-drop-style upload (`POST /upload`, see "Uploading your own account sheets" above). Synthetic-data auto-generation is a *development-only* convenience (`python -m src.launcher` from source), gated on `src.paths.is_frozen()` — the same signal that already distinguishes bundled-asset paths from source paths, so no separate flag was needed. Verified directly: the built `.exe`, run standalone, reports all three built-in datasets as unavailable — nothing pre-loaded.
+3. **User data persists next to the .exe, not inside PyInstaller's temp extraction folder.** This matters for correctness, not just tidiness: PyInstaller's onefile mode extracts into a fresh temp directory (`sys._MEIPASS`) on every launch and deletes it on exit — writing the user's uploaded data there would silently lose it between sessions. `src/paths.py` resolves all writable paths (`data/`) to the directory containing the actual `.exe` instead. Verified directly: ran the built `.exe` from a clean directory away from the source tree, uploaded a file through it, and confirmed it landed at `<exe's folder>\data\uploaded\...` on disk.
+
 ## Tech Stack
 
 | Layer        | Technology          |
@@ -209,6 +237,7 @@ Same guardrail philosophy as `/ask`, adapted for tool use: read-only and advisor
 | Testing      | Pytest              |
 | Demo API     | FastAPI + Uvicorn   |
 | Dashboard    | Static HTML/CSS/vanilla JS (no build step, no CDN) |
+| Desktop packaging | PyInstaller (one-file .exe) + pywebview (native window via Edge WebView2) |
 
 ## Status
 
@@ -226,5 +255,6 @@ Same guardrail philosophy as `/ask`, adapted for tool use: read-only and advisor
 - [x] Generic account-sheet upload (`POST /upload`, `src/ingest.py`) — no pre-formatting required; auto-maps arbitrary CSV/Excel column names onto GatewayRecord/LedgerRecord, transparent about every detected column and every skipped row
 - [x] Free-text Q&A / "prompt the agent" (`POST /ask`, `ask_agent` in `src/llm_agent.py`) — read-only, advisory, grounded in the last report; caught and fixed a real suspicious-directive-detection miss via live adversarial testing
 - [x] Autonomous multi-step tool-calling investigator (`POST /investigate`, `src/investigator.py`) — the part that actually earns "agentic AI": the LLM decides for itself which read-only tools to call and when to conclude, verified end-to-end against a live tool-calling model (qwen2.5:7b-instruct), including a run where it autonomously widened its own search after an empty result
+- [x] Packaged as an offline-first, one-file `.exe` (`src/launcher.py`, `src/paths.py`, `recon-agent.spec`) — native desktop window (pywebview/WebView2, not a browser tab), no synthetic/demo data in the production build, user data verified to persist next to the `.exe` rather than PyInstaller's per-launch temp folder
 - [x] Attempted fix for Phase 3 grouped matching's real-world gap (Phase 3b) — built, tested on both datasets per the fix plan's own requirement, and found to trade precision for negligible recall at BenchRec's scale (98%→94.5%, ~1 TP vs ~809 FP). Ships opt-in / disabled by default (`MatchConfig.enable_unmarked_grouping=False`) rather than silently shipped as a win. Remains a genuinely open gap.
 - [ ] Fine-tuning (stretch goal, currently not needed — see LLM tuning above)

@@ -17,5 +17,14 @@ fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9
 
+# Native desktop window for the packaged .exe (src/launcher.py) — wraps
+# the OS's own web renderer (Edge WebView2 on Windows, no extra runtime
+# to ship). See "Packaging as a standalone .exe" in README.md.
+pywebview>=5.0
+
 # Testing
 pytest>=8.2.0
+
+# Build-only, not a runtime dependency — installed separately when
+# building the .exe (see README.md), not needed to run from source.
+# pyinstaller>=6.0
