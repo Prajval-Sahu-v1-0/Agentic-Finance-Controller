@@ -2,10 +2,11 @@
 requests>=2.31.0
 pydantic>=2.7.0
 
-# Optional: only needed by src/inspect_benchrec.py for JSON/Excel/Parquet/
-# SQLite dataset inspection (CSV inspection, which is all BenchRec needs
-# today, does not require pandas).
+# Optional: needed by src/inspect_benchrec.py for JSON/Excel/Parquet/SQLite
+# dataset inspection, and by src/ingest.py for .xlsx/.xls account-sheet
+# uploads (CSV needs neither).
 pandas>=2.2.0
+openpyxl>=3.1.0
 
 # CLI output
 rich>=13.7.0
@@ -14,6 +15,7 @@ rich>=13.7.0
 # existing pipeline, for the buildathon submission demo
 fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
 
 # Testing
 pytest>=8.2.0

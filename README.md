@@ -32,6 +32,7 @@ recon-agent/
     benchrec_map.py               # maps BenchRec's real-world CSVs onto our schema
     inspect_benchrec.py            # read-only structural inspection of raw BenchRec files
     llm_eval.py                     # evaluates LLM model choice + prompting consistency
+    ingest.py                       # generic CSV/Excel account-sheet auto-mapping (no pre-formatting needed)
     api.py                           # FastAPI demo layer wrapping the pipeline
     main.py                        # CLI entry point
   static/
@@ -138,11 +139,27 @@ uvicorn src.api:app --reload
 | Endpoint | What it does |
 |---|---|
 | `GET /health` | liveness check |
-| `GET /datasets` | which mapped datasets exist on disk |
+| `GET /datasets` | which datasets exist on disk — built-in and uploaded |
+| `POST /upload` | upload a raw CSV/Excel account sheet (`file`, `role=gateway\|ledger`, `dataset=name`) — auto-mapped, no pre-formatting needed |
 | `POST /reconcile` | run the pipeline (`{dataset, use_llm, llm_max_calls, ...}`) and return the full report |
 | `GET /report?dataset=...` | the last report generated this session for that dataset |
 
 Report state is in-memory per running server process (not a shared file) — see `api.py`'s module docstring for why (the two BenchRec splits would otherwise clobber each other's `report.json`).
+
+### Uploading your own account sheets
+
+No pre-formatting required — `src/ingest.py` auto-detects columns by name (transaction ID, amount, timestamp, status, counterparty, currency) against a hint vocabulary, the same one `inspect_benchrec.py` already used for read-only inspection, and maps whatever it finds onto `GatewayRecord`/`LedgerRecord`. It's a heuristic, not a guarantee, so every response is transparent about what it did: exactly which source column was used for each field, and exactly why any row was skipped (empty ID, unparseable amount, unparseable date, validation error) — never a silent guess.
+
+```bash
+curl -X POST http://127.0.0.1:8000/upload \
+  -F "file=@settlements.csv" -F "role=gateway" -F "dataset=mycompany"
+curl -X POST http://127.0.0.1:8000/upload \
+  -F "file=@ledger.xlsx" -F "role=ledger" -F "dataset=mycompany"
+curl -X POST http://127.0.0.1:8000/reconcile \
+  -H "Content-Type: application/json" -d '{"dataset": "mycompany"}'
+```
+
+Supports `.csv`, `.tsv`, `.xlsx`, `.xls`; tolerant of common export quirks (currency symbols, thousands separators, several date formats, signed/parenthesized negative amounts). If a required field (transaction ID, amount, timestamp) can't be auto-detected at all, the upload is rejected with the column names it saw, so you know what to fix — there's no silent fallback for a genuinely missing field.
 
 ## Tech Stack
 
@@ -168,5 +185,6 @@ Report state is in-memory per running server process (not a shared file) — see
 - [x] BenchRec eval/test-split validation (`--split eval`) — a genuinely held-out split with its own, messier ground truth; phi3 holds at 100%/100% there too
 - [x] LLM guardrails: advisory-only enforcement (tested), prompt-injection mitigation, output allowlisting + bool-coercion fix, explanation sanitization + Rich-markup escaping, suspicious-directive detection, cost/DoS bound — see "Guardrails" above
 - [x] FastAPI REST endpoints + dashboard UI (`src/api.py`, `static/index.html`) — thin wrapper around the existing pipeline, no reimplementation, no CDN dependencies
+- [x] Generic account-sheet upload (`POST /upload`, `src/ingest.py`) — no pre-formatting required; auto-maps arbitrary CSV/Excel column names onto GatewayRecord/LedgerRecord, transparent about every detected column and every skipped row
 - [x] Attempted fix for Phase 3 grouped matching's real-world gap (Phase 3b) — built, tested on both datasets per the fix plan's own requirement, and found to trade precision for negligible recall at BenchRec's scale (98%→94.5%, ~1 TP vs ~809 FP). Ships opt-in / disabled by default (`MatchConfig.enable_unmarked_grouping=False`) rather than silently shipped as a win. Remains a genuinely open gap.
 - [ ] Fine-tuning (stretch goal, currently not needed — see LLM tuning above)

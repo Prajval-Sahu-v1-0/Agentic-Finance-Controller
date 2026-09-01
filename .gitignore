@@ -14,6 +14,9 @@ __pycache__/
 data/external/raw/
 data/external/processed/
 
+# User-uploaded datasets (src/api.py's POST /upload) — not committed
+data/uploaded/
+
 # OS
 .DS_Store
 Thumbs.db

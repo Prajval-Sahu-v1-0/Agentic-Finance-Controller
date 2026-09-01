@@ -16,7 +16,13 @@ Run
 Endpoints
 ---------
     GET  /health              liveness check
-    GET  /datasets            which mapped datasets are available on disk
+    GET  /datasets            which mapped datasets are available on disk,
+                               static + uploaded
+    POST /upload              upload a raw CSV/Excel account sheet, get it
+                               auto-mapped onto GatewayRecord/LedgerRecord
+                               and saved as (part of) a named dataset — see
+                               src/ingest.py for the "does it need to be
+                               pre-formatted" answer (no)
     POST /reconcile           run the pipeline against a chosen dataset,
                                returns the full report dict (same shape as
                                report.json)
@@ -42,13 +48,14 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from src.exceptions import classify
 from src.generator import load_gateway_records, load_ground_truth, load_ledger_records
+from src.ingest import IngestError, map_to_records, read_table, save_records
 from src.llm_agent import LLMConfig, reason_about_exceptions_batch, reason_about_pairs_batch
 from src.matcher import MatchConfig, ReconciliationEngine
 from src.report import generate_report
@@ -56,6 +63,7 @@ from src.report import generate_report
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "external" / "processed"
+UPLOADED_DIR = DATA_DIR / "uploaded"
 STATIC_DIR = PROJECT_ROOT / "static"
 
 app = FastAPI(
@@ -64,6 +72,8 @@ app = FastAPI(
 )
 
 # dataset name -> (directory holding {prefix}gateway_records.json etc., prefix)
+# for the built-in, pre-mapped datasets. Anything else is looked up in
+# UPLOADED_DIR instead — see _dataset_paths.
 _DATASET_MAP: dict[str, tuple[Path, str]] = {
     "synthetic"      : (DATA_DIR, ""),
     "benchrec_train" : (PROCESSED_DIR, "benchrec_"),
@@ -84,9 +94,19 @@ class ReconcileRequest(BaseModel):
 
 
 def _dataset_paths(dataset: str) -> tuple[Path, Path, Path]:
-    if dataset not in _DATASET_MAP:
-        raise HTTPException(400, f"Unknown dataset {dataset!r}. Valid: {list(_DATASET_MAP)}")
-    data_dir, prefix = _DATASET_MAP[dataset]
+    """
+    Resolve a dataset name to its (gateway, ledger, ground_truth) file
+    paths. Built-in names use _DATASET_MAP; anything else is treated as a
+    user-uploaded dataset id and looked up in UPLOADED_DIR — POST /upload
+    creates these, one call per side (gateway/ledger), under the same
+    `dataset` name. Existence is checked by callers (e.g. /reconcile
+    already 404s cleanly if the gateway file isn't there yet), not here,
+    since an uploaded dataset legitimately might have only one side so far.
+    """
+    if dataset in _DATASET_MAP:
+        data_dir, prefix = _DATASET_MAP[dataset]
+    else:
+        data_dir, prefix = UPLOADED_DIR, f"{dataset}_"
     return (
         data_dir / f"{prefix}gateway_records.json",
         data_dir / f"{prefix}ledger_records.json",
@@ -101,12 +121,80 @@ def health() -> dict:
 
 @app.get("/datasets")
 def list_datasets() -> dict:
-    """Which mapped datasets are actually present on disk right now."""
+    """Which datasets are actually present on disk right now — the
+    built-in ones plus anything uploaded via POST /upload."""
     out = []
     for name in _DATASET_MAP:
-        gw_path, _, _ = _dataset_paths(name)
-        out.append({"name": name, "available": gw_path.exists()})
+        gw_path, led_path, _ = _dataset_paths(name)
+        out.append({"name": name, "available": gw_path.exists() and led_path.exists()})
+
+    if UPLOADED_DIR.is_dir():
+        uploaded_names = sorted({
+            p.name[: -len("_gateway_records.json")]
+            for p in UPLOADED_DIR.glob("*_gateway_records.json")
+        })
+        for name in uploaded_names:
+            gw_path, led_path, _ = _dataset_paths(name)
+            out.append({
+                "name": name,
+                "available": gw_path.exists() and led_path.exists(),
+                "uploaded": True,
+                "has_gateway": gw_path.exists(),
+                "has_ledger": led_path.exists(),
+            })
+
     return {"datasets": out}
+
+
+@app.post("/upload")
+async def upload(
+    file    : UploadFile = File(...),
+    role    : str        = Form(...),
+    dataset : str        = Form("uploaded"),
+) -> dict:
+    """
+    Upload a raw CSV or Excel account sheet — no pre-formatting required.
+    Columns are auto-detected by name (see src/ingest.py); the result is
+    saved as the `role` side ("gateway" or "ledger") of `dataset`. Upload
+    both sides under the same `dataset` name, then POST /reconcile with
+    that dataset name once both are present (check via GET /datasets).
+
+    Returns a mapping summary — which source column was used for each
+    target field, how many rows mapped successfully, and why any row was
+    skipped — so the auto-detection is never a silent guess.
+    """
+    if role not in ("gateway", "ledger"):
+        raise HTTPException(400, f"role must be 'gateway' or 'ledger', got {role!r}")
+    if not dataset or not dataset.replace("_", "").replace("-", "").isalnum():
+        raise HTTPException(400, "dataset must be a non-empty alphanumeric name (- and _ allowed)")
+
+    content = await file.read()
+    try:
+        rows = read_table(content, filename=file.filename or "upload.csv")
+        result = map_to_records(rows, role=role)
+    except IngestError as exc:
+        raise HTTPException(422, str(exc))
+
+    if not result.records:
+        raise HTTPException(
+            422,
+            f"0 of {result.total_rows} rows mapped successfully. "
+            f"Detected columns: {result.column_map}. First few skip reasons: {result.skipped[:5]}",
+        )
+
+    target_path = UPLOADED_DIR / f"{dataset}_{role}_records.json"
+    save_records(result.records, target_path)
+
+    return {
+        "dataset"       : dataset,
+        "role"          : role,
+        "saved_to"      : str(target_path),
+        "total_rows"    : result.total_rows,
+        "mapped_count"  : result.mapped_count,
+        "skipped_count" : len(result.skipped),
+        "skipped_sample": [{"row": i, "reason": reason} for i, reason in result.skipped[:20]],
+        "column_map"    : result.column_map,
+    }
 
 
 @app.post("/reconcile")
@@ -117,12 +205,15 @@ def reconcile(req: ReconcileRequest) -> dict:
     engine, same guardrails, same output shape as `python -m src.main --run`.
     """
     gw_path, led_path, gt_path = _dataset_paths(req.dataset)
-    if not gw_path.exists():
+    if not gw_path.exists() or not led_path.exists():
+        missing_side = "gateway" if not gw_path.exists() else "ledger"
         raise HTTPException(
             404,
-            f"Dataset {req.dataset!r} not found at {gw_path}. "
-            "Generate it first (python -m src.main --generate) or map it "
-            "(python -m src.benchrec_map --split train|eval).",
+            f"Dataset {req.dataset!r} is missing its {missing_side} side "
+            f"(expected at {gw_path if missing_side == 'gateway' else led_path}). "
+            "Generate a built-in dataset (python -m src.main --generate), map "
+            "BenchRec (python -m src.benchrec_map --split train|eval), or "
+            "POST /upload for a custom dataset (upload both gateway and ledger sides).",
         )
 
     gw  = load_gateway_records(gw_path)
@@ -148,7 +239,7 @@ def reconcile(req: ReconcileRequest) -> dict:
             pair_audit_pairs = random.Random(42).sample(weak_matches, sample_size)
             pair_audit_results = reason_about_pairs_batch(pair_audit_pairs, cfg=cfg, max_calls=req.llm_max_calls)
 
-    data_dir, _ = _DATASET_MAP[req.dataset]
+    data_dir = gw_path.parent
     report = generate_report(
         result, exceptions,
         ground_truth       = gt,
@@ -164,8 +255,6 @@ def reconcile(req: ReconcileRequest) -> dict:
 @app.get("/report")
 def get_report(dataset: str = "synthetic") -> dict:
     """The last report generated THIS SESSION for `dataset` — POST /reconcile first."""
-    if dataset not in _DATASET_MAP:
-        raise HTTPException(400, f"Unknown dataset {dataset!r}. Valid: {list(_DATASET_MAP)}")
     if dataset not in _last_reports:
         raise HTTPException(404, f"No report yet for {dataset!r} this session — POST /reconcile first.")
     return _last_reports[dataset]
