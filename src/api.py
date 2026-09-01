@@ -34,6 +34,10 @@ Endpoints
                                read-only, advisory, same guardrails as the
                                rest of the LLM layer; see
                                src/llm_agent.py's ask_agent docstring
+    POST /investigate         autonomous multi-step tool-calling
+                               investigation of ONE exception — the LLM
+                               decides what to check next itself; see
+                               src/investigator.py's module docstring
     GET  /                    the dashboard (static/index.html)
 
 State
@@ -61,6 +65,7 @@ from pydantic import BaseModel
 from src.exceptions import classify
 from src.generator import load_gateway_records, load_ground_truth, load_ledger_records
 from src.ingest import IngestError, map_to_records, read_table, save_records
+from src.investigator import investigate_exception
 from src.llm_agent import LLMConfig, ask_agent, reason_about_exceptions_batch, reason_about_pairs_batch
 from src.matcher import MatchConfig, ReconciliationEngine
 from src.report import generate_report
@@ -87,6 +92,11 @@ _DATASET_MAP: dict[str, tuple[Path, str]] = {
 
 # In-memory report cache — see module docstring's "State" section.
 _last_reports: dict[str, dict] = {}
+# Same lifetime/rationale, so POST /investigate can look up a specific
+# exception by ID and search within the same record set without re-running
+# the whole pipeline just to investigate one exception.
+_last_exceptions: dict[str, list] = {}
+_last_records: dict[str, tuple[list, list]] = {}
 
 
 class ReconcileRequest(BaseModel):
@@ -254,6 +264,8 @@ def reconcile(req: ReconcileRequest) -> dict:
         pair_audit_results  = pair_audit_results,
     )
     _last_reports[req.dataset] = report
+    _last_exceptions[req.dataset] = exceptions
+    _last_records[req.dataset] = (gw, led)
     return report
 
 
@@ -295,6 +307,52 @@ def ask(req: AskRequest) -> dict:
     report = _last_reports.get(req.dataset)
     cfg = LLMConfig(model=req.llm_model)
     result = ask_agent(req.prompt, report=report, cfg=cfg)
+    return result.to_dict()
+
+
+class InvestigateRequest(BaseModel):
+    dataset       : str   = "synthetic"
+    exception_id  : str
+    llm_model     : str   = "qwen2.5:7b-instruct-q4_K_M"
+    max_steps     : int   = 6
+    # Higher than LLMConfig's normal 60s default: each step is a full
+    # /api/chat round-trip with the tool schema attached, and the first
+    # call in particular pays a model-load cost — measured at up to ~130s
+    # for a 4-step investigation on this project's dev hardware. A per-call
+    # cap that's too tight fails the FIRST call before the loop even gets
+    # going, which is a worse failure mode than just waiting.
+    timeout_seconds: float = 150.0
+
+
+@app.post("/investigate")
+def investigate(req: InvestigateRequest) -> dict:
+    """
+    Autonomous multi-step investigation of one exception ("agent, go figure
+    out why this didn't match"). Unlike /ask, the LLM here decides for
+    itself what to check next — it calls read-only tools (search for a
+    candidate counterpart, inspect a specific record) across up to
+    `max_steps` turns, then concludes with a finding, a confidence level,
+    and a recommended next step. See src/investigator.py's module
+    docstring for why this needs a tool-calling-capable model (the
+    project's tuned phi3:latest default has no tool-calling capability at
+    all) and the guardrails that apply — same philosophy as /ask
+    (read-only, advisory, suspicious-directive scanning) adapted for a
+    multi-step tool-using loop instead of one prompt.
+
+    POST /reconcile first — this looks up `exception_id` in the exceptions
+    classified by the last run for `dataset`.
+    """
+    if req.dataset not in _last_exceptions:
+        raise HTTPException(404, f"No exceptions available for {req.dataset!r} this session — POST /reconcile first.")
+
+    exceptions = _last_exceptions[req.dataset]
+    exc = next((e for e in exceptions if e.exception_id == req.exception_id), None)
+    if exc is None:
+        raise HTTPException(404, f"No exception {req.exception_id!r} found in the last run for {req.dataset!r}.")
+
+    gw, led = _last_records[req.dataset]
+    cfg = LLMConfig(model=req.llm_model, timeout_seconds=req.timeout_seconds)
+    result = investigate_exception(exc, gw, led, cfg=cfg, max_steps=req.max_steps)
     return result.to_dict()
 
 

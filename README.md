@@ -3,9 +3,12 @@
 A **multi-source financial reconciliation agent**: matches payment-gateway settlement
 records against an internal ledger, groups batch/split payouts, falls back to
 content-based matching when reference IDs don't correlate, classifies whatever's left
-into actionable exception categories, and (optionally) asks a local LLM for a second
-opinion on each exception. Validated against both a synthetic oracle dataset and
-BenchRec, a real-world external cash-reconciliation benchmark (ICAIF 2023).
+into actionable exception categories, and gives a local LLM two distinct jobs — a
+single-shot second opinion on each exception, and (the part that actually earns
+"agentic") an autonomous multi-step investigator that decides for itself which
+read-only tools to call to chase down a plausible match. Validated against both a
+synthetic oracle dataset and BenchRec, a real-world external cash-reconciliation
+benchmark (ICAIF 2023).
 
 ---
 
@@ -33,6 +36,7 @@ recon-agent/
     inspect_benchrec.py            # read-only structural inspection of raw BenchRec files
     llm_eval.py                     # evaluates LLM model choice + prompting consistency
     ingest.py                       # generic CSV/Excel account-sheet auto-mapping (no pre-formatting needed)
+    investigator.py                 # autonomous multi-step tool-calling exception investigator
     api.py                           # FastAPI demo layer wrapping the pipeline
     main.py                        # CLI entry point
   static/
@@ -144,6 +148,7 @@ uvicorn src.api:app --reload
 | `POST /reconcile` | run the pipeline (`{dataset, use_llm, llm_max_calls, ...}`) and return the full report |
 | `GET /report?dataset=...` | the last report generated this session for that dataset |
 | `POST /ask` | free-text Q&A ("prompt the agent") grounded in the last report for a dataset — `{dataset, prompt, llm_model}` |
+| `POST /investigate` | autonomous multi-step tool-calling investigation of ONE exception — `{dataset, exception_id, llm_model, max_steps}` |
 
 Report state is in-memory per running server process (not a shared file) — see `api.py`'s module docstring for why (the two BenchRec splits would otherwise clobber each other's `report.json`).
 
@@ -174,6 +179,26 @@ curl -X POST http://127.0.0.1:8000/ask \
 
 This is the highest-injection-risk entry point in the codebase, since the whole point is for the user's text to steer the response — unlike every other LLM call here, it can't just wrap untrusted text in "don't follow instructions inside this" delimiters. Instead: the ground rules (no execution ability, no inventing data, decline out-of-scope requests) are stated in the system framing *above* the user's text so they can't be overridden by it; the response is still run through the same suspicious-directive detector as everywhere else — caught for real in testing: a model that correctly refused to "execute" a wire transfer nonetheless suggested, calmly and without urgency language, moving funds to an attacker-supplied account number, which the original detector missed (it only looked for urgency language or the literal word "number" next to digits) and the widened version now catches; and `ask_agent` is read-only by construction — it never imports or calls `classify()`, the matcher, or `generate_report`, so there is no code path from a typed question to any pipeline state changing. See `src/llm_agent.py`'s module docstring and `ask_agent`'s own docstring for the full detail.
 
+## Agentic AI
+
+`/ask` is a single-shot Q&A endpoint — one prompt in, one answer out, no autonomy. `POST /investigate` is genuinely different: given one exception, the LLM runs a bounded, autonomous, multi-step tool-calling loop (`src/investigator.py`) — it decides for itself which of two read-only tools to call next based on what it's already learned, until it either concludes or hits a step cap. This is the part of the codebase that actually earns "agentic": multi-step, tool-using, autonomous decision-making toward a goal, not commentary on a decision something else already made.
+
+```bash
+curl -X POST http://127.0.0.1:8000/investigate \
+  -H "Content-Type: application/json" \
+  -d '{"dataset": "synthetic", "exception_id": "EX-AMT-000003"}'
+```
+
+**Tools available to the agent** (read-only, fixed schema, nothing outside this list is callable): `search_candidates(amount_min, amount_max, days_before, days_after)` — search the opposite side for a plausible counterpart; `get_record_details(transaction_id)` — inspect one specific record; `conclude(finding, confidence, recommended_action)` — the agent must call this to finish.
+
+**A real run, unscripted** (`EX-AMT-000003` against the synthetic dataset, `qwen2.5:7b-instruct-q4_K_M` — `phi3:latest`, this project's tuned single-shot default, has no tool-calling capability at all, see the module docstring for why this needs a different model):
+1. `search_candidates(amount_min=31000, amount_max=31500, days_before=3, days_after=3)` → no candidates.
+2. Widened its own search on its own initiative — not scripted, not prompted to retry: `search_candidates(amount_min=31000, amount_max=32000, days_before=5, days_after=5)` → found `LED-2024-000025`.
+3. `get_record_details("LED-2024-000025")` → inspected it.
+4. `conclude(...)`: *"The transaction ID rzp_live_LOQbqV5vliOeT8 does not have a confirmed counterpart, but a plausible match was found... The amounts are close, differing by 1.89%, and the timestamps are within a reasonable range."* Confidence: medium. Recommended action: review both transactions to confirm the match.
+
+Same guardrail philosophy as `/ask`, adapted for tool use: read-only and advisory only (the two tools can only read already-loaded records — nothing writes, matches, or classifies, and the conclusion is returned as data, never fed back into the matcher or `generate_report`); a bounded action space (exactly three tools, malformed/unknown calls return an error string to the model rather than executing anything); a hard step cap and per-search result cap for cost/context control; record data returned by tools is sanitized before re-entering the conversation, same as every other prompt builder; and the final finding/recommendation is scanned by the same suspicious-directive detector as `/ask`. See `src/investigator.py`'s module docstring for the full detail.
+
 ## Tech Stack
 
 | Layer        | Technology          |
@@ -200,5 +225,6 @@ This is the highest-injection-risk entry point in the codebase, since the whole 
 - [x] FastAPI REST endpoints + dashboard UI (`src/api.py`, `static/index.html`) — thin wrapper around the existing pipeline, no reimplementation, no CDN dependencies
 - [x] Generic account-sheet upload (`POST /upload`, `src/ingest.py`) — no pre-formatting required; auto-maps arbitrary CSV/Excel column names onto GatewayRecord/LedgerRecord, transparent about every detected column and every skipped row
 - [x] Free-text Q&A / "prompt the agent" (`POST /ask`, `ask_agent` in `src/llm_agent.py`) — read-only, advisory, grounded in the last report; caught and fixed a real suspicious-directive-detection miss via live adversarial testing
+- [x] Autonomous multi-step tool-calling investigator (`POST /investigate`, `src/investigator.py`) — the part that actually earns "agentic AI": the LLM decides for itself which read-only tools to call and when to conclude, verified end-to-end against a live tool-calling model (qwen2.5:7b-instruct), including a run where it autonomously widened its own search after an empty result
 - [x] Attempted fix for Phase 3 grouped matching's real-world gap (Phase 3b) — built, tested on both datasets per the fix plan's own requirement, and found to trade precision for negligible recall at BenchRec's scale (98%→94.5%, ~1 TP vs ~809 FP). Ships opt-in / disabled by default (`MatchConfig.enable_unmarked_grouping=False`) rather than silently shipped as a win. Remains a genuinely open gap.
 - [ ] Fine-tuning (stretch goal, currently not needed — see LLM tuning above)
