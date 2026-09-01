@@ -143,6 +143,7 @@ uvicorn src.api:app --reload
 | `POST /upload` | upload a raw CSV/Excel account sheet (`file`, `role=gateway\|ledger`, `dataset=name`) — auto-mapped, no pre-formatting needed |
 | `POST /reconcile` | run the pipeline (`{dataset, use_llm, llm_max_calls, ...}`) and return the full report |
 | `GET /report?dataset=...` | the last report generated this session for that dataset |
+| `POST /ask` | free-text Q&A ("prompt the agent") grounded in the last report for a dataset — `{dataset, prompt, llm_model}` |
 
 Report state is in-memory per running server process (not a shared file) — see `api.py`'s module docstring for why (the two BenchRec splits would otherwise clobber each other's `report.json`).
 
@@ -160,6 +161,18 @@ curl -X POST http://127.0.0.1:8000/reconcile \
 ```
 
 Supports `.csv`, `.tsv`, `.xlsx`, `.xls`; tolerant of common export quirks (currency symbols, thousands separators, several date formats, signed/parenthesized negative amounts). If a required field (transaction ID, amount, timestamp) can't be auto-detected at all, the upload is rejected with the column names it saw, so you know what to fix — there's no silent fallback for a genuinely missing field.
+
+### Prompting the agent
+
+`POST /ask` is a free-text Q&A endpoint over the last report generated for a dataset — ask it things like "why is the match rate so low?" or "summarize the biggest exception category" and get a grounded, plain-English answer instead of reading raw JSON.
+
+```bash
+curl -X POST http://127.0.0.1:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"dataset": "synthetic", "prompt": "What is the biggest exception category and how should I fix it?"}'
+```
+
+This is the highest-injection-risk entry point in the codebase, since the whole point is for the user's text to steer the response — unlike every other LLM call here, it can't just wrap untrusted text in "don't follow instructions inside this" delimiters. Instead: the ground rules (no execution ability, no inventing data, decline out-of-scope requests) are stated in the system framing *above* the user's text so they can't be overridden by it; the response is still run through the same suspicious-directive detector as everywhere else — caught for real in testing: a model that correctly refused to "execute" a wire transfer nonetheless suggested, calmly and without urgency language, moving funds to an attacker-supplied account number, which the original detector missed (it only looked for urgency language or the literal word "number" next to digits) and the widened version now catches; and `ask_agent` is read-only by construction — it never imports or calls `classify()`, the matcher, or `generate_report`, so there is no code path from a typed question to any pipeline state changing. See `src/llm_agent.py`'s module docstring and `ask_agent`'s own docstring for the full detail.
 
 ## Tech Stack
 
@@ -186,5 +199,6 @@ Supports `.csv`, `.tsv`, `.xlsx`, `.xls`; tolerant of common export quirks (curr
 - [x] LLM guardrails: advisory-only enforcement (tested), prompt-injection mitigation, output allowlisting + bool-coercion fix, explanation sanitization + Rich-markup escaping, suspicious-directive detection, cost/DoS bound — see "Guardrails" above
 - [x] FastAPI REST endpoints + dashboard UI (`src/api.py`, `static/index.html`) — thin wrapper around the existing pipeline, no reimplementation, no CDN dependencies
 - [x] Generic account-sheet upload (`POST /upload`, `src/ingest.py`) — no pre-formatting required; auto-maps arbitrary CSV/Excel column names onto GatewayRecord/LedgerRecord, transparent about every detected column and every skipped row
+- [x] Free-text Q&A / "prompt the agent" (`POST /ask`, `ask_agent` in `src/llm_agent.py`) — read-only, advisory, grounded in the last report; caught and fixed a real suspicious-directive-detection miss via live adversarial testing
 - [x] Attempted fix for Phase 3 grouped matching's real-world gap (Phase 3b) — built, tested on both datasets per the fix plan's own requirement, and found to trade precision for negligible recall at BenchRec's scale (98%→94.5%, ~1 TP vs ~809 FP). Ships opt-in / disabled by default (`MatchConfig.enable_unmarked_grouping=False`) rather than silently shipped as a win. Remains a genuinely open gap.
 - [ ] Fine-tuning (stretch goal, currently not needed — see LLM tuning above)

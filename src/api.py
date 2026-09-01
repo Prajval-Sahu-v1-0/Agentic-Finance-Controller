@@ -29,6 +29,11 @@ Endpoints
     GET  /report?dataset=...  the last report generated THIS SESSION for
                                that dataset (in-memory only — a fresh
                                server has nothing until /reconcile runs)
+    POST /ask                 free-text Q&A ("prompt the agent") grounded
+                               in the last report generated for a dataset —
+                               read-only, advisory, same guardrails as the
+                               rest of the LLM layer; see
+                               src/llm_agent.py's ask_agent docstring
     GET  /                    the dashboard (static/index.html)
 
 State
@@ -56,7 +61,7 @@ from pydantic import BaseModel
 from src.exceptions import classify
 from src.generator import load_gateway_records, load_ground_truth, load_ledger_records
 from src.ingest import IngestError, map_to_records, read_table, save_records
-from src.llm_agent import LLMConfig, reason_about_exceptions_batch, reason_about_pairs_batch
+from src.llm_agent import LLMConfig, ask_agent, reason_about_exceptions_batch, reason_about_pairs_batch
 from src.matcher import MatchConfig, ReconciliationEngine
 from src.report import generate_report
 
@@ -258,6 +263,39 @@ def get_report(dataset: str = "synthetic") -> dict:
     if dataset not in _last_reports:
         raise HTTPException(404, f"No report yet for {dataset!r} this session — POST /reconcile first.")
     return _last_reports[dataset]
+
+
+class AskRequest(BaseModel):
+    dataset  : str = "synthetic"
+    prompt   : str
+    llm_model: str = "phi3:latest"
+
+
+@app.post("/ask")
+def ask(req: AskRequest) -> dict:
+    """
+    Free-text Q&A ("prompt the agent") grounded in the last report
+    generated for `req.dataset` this session — POST /reconcile first for a
+    data-grounded answer; without one, only general questions get answered.
+
+    Read-only and advisory only: this never re-runs reconciliation,
+    classification, or anything else that could change pipeline state — it
+    can only read an already-generated report and talk about it. See
+    src/llm_agent.py's ask_agent docstring (and its module docstring's
+    Guardrails section) for the full detail on how a user's free text is
+    handled safely: length-capped and sanitized before entering the
+    prompt, the model is told it cannot execute actions or invent report
+    data, and the response is scanned for directive-like financial
+    language before being returned — check `flagged_suspicious` before
+    surfacing an answer a user might act on.
+    """
+    if not req.prompt or not req.prompt.strip():
+        raise HTTPException(400, "prompt must not be empty")
+
+    report = _last_reports.get(req.dataset)
+    cfg = LLMConfig(model=req.llm_model)
+    result = ask_agent(req.prompt, report=report, cfg=cfg)
+    return result.to_dict()
 
 
 @app.get("/")

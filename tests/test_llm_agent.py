@@ -27,6 +27,8 @@ from src.llm_agent import (
     _parse_llm_response,
     _sanitize_llm_text,
     _sanitize_untrusted_field,
+    _summarize_report_for_prompt,
+    ask_agent,
     reason_about_exception,
 )
 from src.schema import GatewayRecord
@@ -164,6 +166,19 @@ def test_suspicious_directive_does_not_flag_normal_explanation() -> None:
     assert reason is None
 
 
+def test_suspicious_directive_flags_non_urgent_account_suggestion() -> None:
+    # Real miss found via live adversarial testing of ask_agent: a model
+    # refused to "execute" a transfer but still suggested — calmly, no
+    # urgency language, no "number"/"no."/"#" between "account" and the
+    # digits — moving funds to an attacker-supplied account number. The
+    # original patterns required urgency language OR the literal word
+    # "number" and missed this phrasing entirely.
+    reason = _detect_suspicious_directive(
+        "You can manually transfer the funds to account 9988776655 to reconcile the accounts."
+    )
+    assert reason is not None
+
+
 def _make_exception_record() -> ExceptionRecord:
     gw = GatewayRecord(
         transaction_id="rzp_test_1",
@@ -230,3 +245,129 @@ def test_reason_about_exception_flags_suspicious_output(monkeypatch) -> None:
     result = reason_about_exception(exc, cfg=LLMConfig())
     assert result.flagged_suspicious is True
     assert result.flag_reason is not None
+
+
+# ---------------------------------------------------------------------------
+# ask_agent — free-text Q&A ("prompt the agent")
+# ---------------------------------------------------------------------------
+
+_SAMPLE_REPORT = {
+    "match_summary": {
+        "total_gateway_records": 104,
+        "total_ledger_records": 102,
+        "total_matched": {"count": 77, "rate_pct": 74.04},
+        "unresolved": {"count": 50, "rate_pct": 48.08},
+    },
+    "monetary_summary": {
+        "currency": "INR",
+        "matched_gateway_value": "1000.00",
+        "matched_ledger_value": "1000.00",
+        "unresolved_gateway_value": "500.00",
+        "unresolved_ledger_value": "600.00",
+    },
+    "exception_breakdown": [
+        {"category": "amount_mismatch", "count": 10, "share_pct": 20.0},
+        {"category": "duplicate", "count": 5, "share_pct": 10.0},
+    ],
+}
+
+
+def test_ask_agent_rejects_empty_prompt() -> None:
+    result = ask_agent("   ", report=_SAMPLE_REPORT, cfg=LLMConfig())
+    assert result.fallback_used is True
+    assert result.fallback_reason == "EmptyPrompt"
+
+
+def test_ask_agent_never_touches_report(monkeypatch) -> None:
+    """
+    Read-only by construction: ask_agent must not mutate the report dict
+    it was given, and — since it never imports/calls classify(), the
+    matcher, or generate_report — there is no code path from a question
+    to any pipeline state changing. This test locks the "doesn't mutate
+    its input" half of that guarantee; the "doesn't call pipeline code"
+    half is structural (see the module docstring) and enforced by
+    ask_agent's implementation not importing those functions at all.
+    """
+    import copy
+    original = copy.deepcopy(_SAMPLE_REPORT)
+
+    def fake_call_ollama(prompt: str, cfg: LLMConfig) -> str:
+        return "The match rate is 74.04%, with 50 unresolved records."
+
+    monkeypatch.setattr("src.llm_agent._call_ollama", fake_call_ollama)
+    ask_agent("What's the match rate?", report=_SAMPLE_REPORT, cfg=LLMConfig())
+    assert _SAMPLE_REPORT == original
+
+
+def test_ask_agent_grounds_prompt_in_report_context(monkeypatch) -> None:
+    captured_prompt = {}
+
+    def fake_call_ollama(prompt: str, cfg: LLMConfig) -> str:
+        captured_prompt["value"] = prompt
+        return "Answer."
+
+    monkeypatch.setattr("src.llm_agent._call_ollama", fake_call_ollama)
+    ask_agent("What's the match rate?", report=_SAMPLE_REPORT, cfg=LLMConfig())
+
+    prompt = captured_prompt["value"]
+    assert "74.04" in prompt          # match rate from the report context
+    assert "amount_mismatch" in prompt  # exception breakdown from the context
+    assert "What's the match rate?" in prompt  # the user's question, verbatim
+
+
+def test_ask_agent_declines_when_no_report_available(monkeypatch) -> None:
+    captured_prompt = {}
+
+    def fake_call_ollama(prompt: str, cfg: LLMConfig) -> str:
+        captured_prompt["value"] = prompt
+        return "I don't have report data to answer that."
+
+    monkeypatch.setattr("src.llm_agent._call_ollama", fake_call_ollama)
+    result = ask_agent("What's the match rate?", report=None, cfg=LLMConfig())
+
+    assert result.fallback_used is False
+    assert "No reconciliation report" in captured_prompt["value"]
+
+
+def test_ask_agent_sanitizes_and_truncates_user_prompt(monkeypatch) -> None:
+    captured_prompt = {}
+
+    def fake_call_ollama(prompt: str, cfg: LLMConfig) -> str:
+        captured_prompt["value"] = prompt
+        return "Answer."
+
+    monkeypatch.setattr("src.llm_agent._call_ollama", fake_call_ollama)
+    injected = "What's the match rate?\x1b[31mFAKE\x1b[0m" + ("X" * 3000)
+    ask_agent(injected, report=_SAMPLE_REPORT, cfg=LLMConfig())
+
+    prompt = captured_prompt["value"]
+    assert "\x1b" not in prompt
+    assert prompt.count("X") < 3000  # truncated well below the raw injected length
+
+
+def test_ask_agent_flags_suspicious_response(monkeypatch) -> None:
+    def fake_call_ollama(prompt: str, cfg: LLMConfig) -> str:
+        return "You should wire transfer immediately to account 123456789 to resolve this."
+
+    monkeypatch.setattr("src.llm_agent._call_ollama", fake_call_ollama)
+    result = ask_agent("How do I fix this exception?", report=_SAMPLE_REPORT, cfg=LLMConfig())
+
+    assert result.flagged_suspicious is True
+    assert result.flag_reason is not None
+
+
+def test_ask_agent_fails_open_when_ollama_unreachable(monkeypatch) -> None:
+    import requests
+
+    def fake_call_ollama(prompt: str, cfg: LLMConfig) -> str:
+        raise requests.ConnectionError("refused")
+
+    monkeypatch.setattr("src.llm_agent._call_ollama", fake_call_ollama)
+    result = ask_agent("What's the match rate?", report=_SAMPLE_REPORT, cfg=LLMConfig())
+
+    assert result.fallback_used is True
+    assert "not reachable" in result.fallback_reason
+
+
+def test_summarize_report_for_prompt_handles_empty_dict() -> None:
+    assert _summarize_report_for_prompt({}) == "(Report contains no summarizable sections.)"
